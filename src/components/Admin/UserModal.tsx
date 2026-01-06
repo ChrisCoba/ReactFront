@@ -53,10 +53,10 @@ export const UserModal: React.FC<UserModalProps> = ({ show, onHide, user, onSave
         try {
             if (user?.id) {
                 // Edit
-                await axios.put(`https://worldagencyidentidad.runasp.net/api/usuarios/${user.id}`, formData);
+                await axios.put(`https://worldagencyadmin.runasp.net/api/admin/usuarios/${user.id}`, formData);
             } else {
                 // Create (Register)
-                await axios.post('https://worldagencyidentidad.runasp.net/api/auth/register', formData);
+                await axios.post('https://worldagencyadmin.runasp.net/api/admin/usuarios', formData);
             }
             onSave();
             onHide();

@@ -40,7 +40,7 @@ export const ReservationsTable: React.FC = () => {
         const reason = prompt('Please enter a reason for cancellation:');
         if (reason) {
             try {
-                await axios.post(`https://worldagencyreservas.runasp.net/api/reservas/${id}/cancelar`, JSON.stringify(reason), {
+                await axios.post(`https://worldagencyadmin.runasp.net/api/admin/reservas/${id}/cancelar`, JSON.stringify(reason), {
                     headers: { 'Content-Type': 'application/json' }
                 });
                 refetch();
@@ -93,8 +93,8 @@ export const ReservationsTable: React.FC = () => {
                                     <td>${res.total.toFixed(2)}</td>
                                     <td>
                                         <span className={`badge ${res.estado === 'Confirmada' || res.estado === 'Confirmado' ? 'bg-success' :
-                                                res.estado === 'Pendiente' ? 'bg-warning text-dark' :
-                                                    res.estado === 'Cancelada' || res.estado === 'Cancelado' ? 'bg-danger' : 'bg-secondary'
+                                            res.estado === 'Pendiente' ? 'bg-warning text-dark' :
+                                                res.estado === 'Cancelada' || res.estado === 'Cancelado' ? 'bg-danger' : 'bg-secondary'
                                             }`}>
                                             {res.estado}
                                         </span>

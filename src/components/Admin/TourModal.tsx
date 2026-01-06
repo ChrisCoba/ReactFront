@@ -66,14 +66,13 @@ export const TourModal: React.FC<TourModalProps> = ({ show, onHide, tour, onSave
         try {
             if (tour?.id) {
                 // Edit
-                await axios.put(`https://worldagencycatalogo.runasp.net/api/servicios/${tour.id}`, formData);
+                await axios.put(`https://worldagencyadmin.runasp.net/api/admin/servicios/${tour.id}`, formData);
             } else {
                 // Create
-                // Note: Backend Create expects 'CrearServicioDto', mapping is similar
-                await axios.post('https://worldagencycatalogo.runasp.net/api/servicios', {
+                await axios.post('https://worldagencyadmin.runasp.net/api/admin/servicios', {
                     ...formData,
-                    precioBase: formData.precio, // Map to dto expected field if different
-                    cupoMaximo: formData.capacidad // Map to dto expected field
+                    precioBase: formData.precio,
+                    cupoMaximo: formData.capacidad
                 });
             }
             onSave();

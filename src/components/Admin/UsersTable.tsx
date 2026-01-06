@@ -47,7 +47,7 @@ export const UsersTable: React.FC = () => {
     const handleDelete = async (id: number) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
             try {
-                await axios.delete(`https://worldagencyidentidad.runasp.net/api/usuarios/${id}`);
+                await axios.delete(`https://worldagencyadmin.runasp.net/api/admin/usuarios/${id}`);
                 refetch();
             } catch (err) {
                 console.error('Error deleting user:', err);

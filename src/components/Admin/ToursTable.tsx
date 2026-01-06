@@ -37,7 +37,7 @@ export const ToursTable: React.FC = () => {
     const handleDelete = async (id: number) => {
         if (window.confirm('Are you sure you want to delete this tour?')) {
             try {
-                await axios.delete(`https://worldagencycatalogo.runasp.net/api/servicios/${id}`);
+                await axios.delete(`https://worldagencyadmin.runasp.net/api/admin/servicios/${id}`);
                 refetch();
             } catch (err) {
                 console.error('Error deleting tour:', err);
