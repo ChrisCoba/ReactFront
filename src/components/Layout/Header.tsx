@@ -68,30 +68,34 @@ const Header: React.FC = () => {
                             </li>
                         )}
                     </ul>
-                    <i className={`mobile-nav-toggle d-xl-none bi ${isMobileNavActive ? 'bi-x' : 'bi-list'}`} onClick={toggleMobileNav}></i>
                 </nav>
 
-                <Link className="btn-shopping-cart" to="/cart">
-                    <i className="bi bi-cart"></i>
-                    {cartCount > 0 && <span className="badge bg-danger">{cartCount}</span>}
-                </Link>
-
-                {!isAuthenticated ? (
-                    <Link className="btn-getstarted" to="/register">
-                        Registrarse
+                <div className="d-flex align-items-center gap-3">
+                    <Link className="btn-shopping-cart" to="/cart" onClick={closeMobileNav}>
+                        <i className="bi bi-cart"></i>
+                        {cartCount > 0 && <span className="badge bg-danger">{cartCount}</span>}
                     </Link>
-                ) : (
-                    <a
-                        className="btn-getstarted"
-                        href="#"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            logout();
-                        }}
-                    >
-                        Cerrar Sesión
-                    </a>
-                )}
+
+                    {/* Mobile Toggle */}
+                    <i className={`mobile-nav-toggle d-xl-none bi ${isMobileNavActive ? 'bi-x' : 'bi-list'}`} onClick={toggleMobileNav}></i>
+
+                    {!isAuthenticated ? (
+                        <Link className="btn-getstarted d-none d-md-block" to="/register">
+                            Registrarse
+                        </Link>
+                    ) : (
+                        <a
+                            className="btn-getstarted d-none d-md-block"
+                            href="#"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                logout();
+                            }}
+                        >
+                            Cerrar Sesión
+                        </a>
+                    )}
+                </div>
             </div>
         </header>
     );

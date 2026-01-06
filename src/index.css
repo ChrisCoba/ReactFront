@@ -10,14 +10,14 @@
   --default-font: 'Roboto', system-ui, sans-serif;
   --heading-font: 'Raleway', sans-serif;
   --nav-font: 'Poppins', sans-serif;
-  
+
   --background-color: #ffffff;
   --default-color: #051e23;
   --heading-color: #1c4b56;
   --accent-color: #008cad;
   --surface-color: #ffffff;
   --contrast-color: #ffffff;
-  
+
   --nav-color: rgba(255, 255, 255, 0.7);
   --nav-hover-color: #ffffff;
 }
@@ -46,7 +46,12 @@ a:hover {
   color: #006685;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--heading-color);
   font-family: var(--heading-font);
 }
@@ -118,7 +123,7 @@ h1, h2, h3, h4, h5, h6 {
   transition: 0.3s;
 }
 
-.navmenu li:hover > a,
+.navmenu li:hover>a,
 .navmenu .active {
   color: var(--nav-hover-color);
 }
@@ -134,7 +139,7 @@ h1, h2, h3, h4, h5, h6 {
   min-width: 200px;
 }
 
-.navmenu .dropdown:hover > ul {
+.navmenu .dropdown:hover>ul {
   display: block;
 }
 
@@ -382,11 +387,11 @@ h1, h2, h3, h4, h5, h6 {
   .hero-title {
     font-size: 32px;
   }
-  
+
   .hero-subtitle {
     font-size: 16px;
   }
-  
+
   .main {
     margin-top: 70px;
   }
@@ -412,6 +417,7 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--contrast-color);
   color: var(--accent-color);
 }
+
 /* Mobile Navigation */
 @media (max-width: 1200px) {
   .navmenu {
@@ -453,29 +459,39 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
   }
 
-  .navmenu .dropdown:hover > ul {
+  .navmenu .dropdown:hover>ul {
     display: block;
   }
 
   .mobile-nav-toggle {
-    position: absolute; /* Changed from fixed to handle proper layout */
-    top: 20px;
-    right: 20px;
+    display: block;
     font-size: 28px;
-    z-index: 9999; /* Ensure it stays above everything */
+    z-index: 9999;
     cursor: pointer;
-    color: var(--contrast-color);
+    color: #ffffff;
+    /* Contrast against dark header background or overlay */
+    transition: 0.3s;
+  }
+
+  /* Floating Cart Button on Mobile */
+  .btn-shopping-cart {
+    position: fixed;
+    bottom: 20px;
+    right: 70px;
+    /* Next to scroll-top if possible, or left of it */
+    z-index: 998;
+    width: 50px;
+    height: 50px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  .btn-shopping-cart .badge {
+    font-size: 12px;
+    padding: 4px 7px;
   }
 }
 
-/* Fix mobile toggle button visibility on smaller screens */
-@media (max-width: 1200px) {
-    .mobile-nav-toggle {
-        display: block; /* Ensure it shows up */
-    }
-    
-    /* When menu is active, make the toggle button darker if inside white menu */
-    .navmenu.mobile-nav-active .mobile-nav-toggle {
-        color: var(--default-color);
-    }
+/* Adjust toggle color when menu is open */
+.mobile-nav-active+div .mobile-nav-toggle {
+  color: var(--default-color);
 }
