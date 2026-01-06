@@ -78,7 +78,7 @@ export const GET_ADMIN_DASHBOARD = gql`
       totalUsers
       totalReservations
       totalRevenue
-      recentBookings(limit: 10) {
+      recentBookings {
         id
         codigo
         fechaReserva
@@ -95,7 +95,7 @@ export const GET_ADMIN_DASHBOARD = gql`
           nombre
         }
       }
-      topPackages(limit: 5) {
+      topPackages {
         nombre
         ciudad
         precio
