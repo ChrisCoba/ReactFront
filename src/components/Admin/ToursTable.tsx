@@ -7,13 +7,10 @@ import axios from 'axios';
 interface Tour {
     id: number;
     nombre: string;
-    descripcion: string;
     precio: number;
     duracion: number;
-    capacidad?: number;
-    cuposDisponibles?: number;
-    imagen: string;
     ciudad: string;
+    pais?: string;
     tipoActividad?: string;
 }
 
@@ -33,10 +30,7 @@ export const ToursTable: React.FC = () => {
     const paginatedTours = tours.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
     const handleEdit = (tour: Tour) => {
-        setSelectedTour({
-            ...tour,
-            capacidad: tour.cuposDisponibles || tour.capacidad || 10
-        });
+        setSelectedTour(tour);
         setShowModal(true);
     };
 
@@ -74,11 +68,11 @@ export const ToursTable: React.FC = () => {
                         <thead className="table-light">
                             <tr>
                                 <th>ID</th>
-                                <th>Image</th>
                                 <th>Name</th>
                                 <th>City</th>
                                 <th>Price</th>
                                 <th>Duration</th>
+                                <th>Type</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -86,13 +80,11 @@ export const ToursTable: React.FC = () => {
                             {paginatedTours.length > 0 ? paginatedTours.map(tour => (
                                 <tr key={tour.id}>
                                     <td>{tour.id}</td>
-                                    <td>
-                                        <img src={tour.imagen} alt={tour.nombre} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }} />
-                                    </td>
                                     <td>{tour.nombre}</td>
                                     <td>{tour.ciudad}</td>
                                     <td>${tour.precio}</td>
                                     <td>{tour.duracion} days</td>
+                                    <td>{tour.tipoActividad || 'N/A'}</td>
                                     <td>
                                         <button className="btn btn-sm btn-info me-2" onClick={() => handleEdit(tour)}>
                                             <i className="bi bi-pencil"></i>

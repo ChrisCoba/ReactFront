@@ -7,13 +7,9 @@ const PACKAGE_FIELDS = gql`
     nombre
     ciudad
     pais
-    descripcion
     precio
     duracion
-    imagen
-    fechaInicio
     tipoActividad
-    cuposDisponibles
   }
 `;
 
