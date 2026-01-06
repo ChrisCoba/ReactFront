@@ -108,8 +108,8 @@ export const GET_ADMIN_DASHBOARD = gql`
 
 export const GET_USERS_LIST = gql`
   ${USER_FIELDS}
-  query GetUsersList($limit: Int) {
-    users(limit: $limit) {
+  query GetUsersList($page: Int, $limit: Int) {
+    users(page: $page, limit: $limit) {
       ...UserFields
       totalSpent
     }
