@@ -412,3 +412,70 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--contrast-color);
   color: var(--accent-color);
 }
+/* Mobile Navigation */
+@media (max-width: 1200px) {
+  .navmenu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 9999;
+    padding: 60px 20px 20px 20px;
+    background: var(--surface-color);
+    transition: all 0.3s;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+    transform: translateX(100%);
+  }
+
+  .navmenu.mobile-nav-active {
+    transform: translateX(0);
+  }
+
+  .navmenu ul {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navmenu a {
+    color: var(--default-color);
+    padding: 10px 0;
+    width: 100%;
+  }
+
+  .navmenu .dropdown ul {
+    position: static;
+    display: none;
+    padding: 10px 0;
+    margin: 10px 0;
+    background: #f9f9f9;
+    box-shadow: none;
+    width: 100%;
+  }
+
+  .navmenu .dropdown:hover > ul {
+    display: block;
+  }
+
+  .mobile-nav-toggle {
+    position: absolute; /* Changed from fixed to handle proper layout */
+    top: 20px;
+    right: 20px;
+    font-size: 28px;
+    z-index: 9999; /* Ensure it stays above everything */
+    cursor: pointer;
+    color: var(--contrast-color);
+  }
+}
+
+/* Fix mobile toggle button visibility on smaller screens */
+@media (max-width: 1200px) {
+    .mobile-nav-toggle {
+        display: block; /* Ensure it shows up */
+    }
+    
+    /* When menu is active, make the toggle button darker if inside white menu */
+    .navmenu.mobile-nav-active .mobile-nav-toggle {
+        color: var(--default-color);
+    }
+}

@@ -1,36 +1,48 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useCart } from '../../hooks/useCart';
 
 const Header: React.FC = () => {
     const { user, logout, isAuthenticated } = useAuth();
     const { cartCount } = useCart();
+    const [isMobileNavActive, setIsMobileNavActive] = useState(false);
+    const location = useLocation();
+
+    const toggleMobileNav = () => {
+        setIsMobileNavActive(!isMobileNavActive);
+        document.body.classList.toggle('mobile-nav-active');
+    };
+
+    const closeMobileNav = () => {
+        setIsMobileNavActive(false);
+        document.body.classList.remove('mobile-nav-active');
+    };
 
     return (
         <header id="header" className="header d-flex align-items-center fixed-top">
             <div className="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
-                <Link to="/" className="logo d-flex align-items-center me-auto me-xl-0">
+                <Link to="/" className="logo d-flex align-items-center me-auto me-xl-0" onClick={closeMobileNav}>
                     <h1 className="sitename">WorldAgency</h1>
                 </Link>
 
-                <nav id="navmenu" className="navmenu">
+                <nav id="navmenu" className={`navmenu ${isMobileNavActive ? 'mobile-nav-active' : ''}`}>
                     <ul>
                         <li>
-                            <Link to="/">Inicio</Link>
+                            <Link to="/" className={location.pathname === '/' ? 'active' : ''} onClick={closeMobileNav}>Inicio</Link>
                         </li>
                         <li>
-                            <Link to="/about">Sobre Nosotros</Link>
+                            <Link to="/about" className={location.pathname === '/about' ? 'active' : ''} onClick={closeMobileNav}>Sobre Nosotros</Link>
                         </li>
                         <li>
-                            <Link to="/destinations">Destinos</Link>
+                            <Link to="/destinations" className={location.pathname === '/destinations' ? 'active' : ''} onClick={closeMobileNav}>Destinos</Link>
                         </li>
                         <li>
-                            <Link to="/tours">Tours</Link>
+                            <Link to="/tours" className={location.pathname === '/tours' ? 'active' : ''} onClick={closeMobileNav}>Tours</Link>
                         </li>
                         {!isAuthenticated ? (
                             <li>
-                                <Link to="/login">Iniciar Sesión</Link>
+                                <Link to="/login" className={location.pathname === '/login' ? 'active' : ''} onClick={closeMobileNav}>Iniciar Sesión</Link>
                             </li>
                         ) : (
                             <li className="dropdown">
@@ -40,15 +52,15 @@ const Header: React.FC = () => {
                                 </a>
                                 <ul>
                                     <li>
-                                        <Link to="/profile">Mi Perfil</Link>
+                                        <Link to="/profile" onClick={closeMobileNav}>Mi Perfil</Link>
                                     </li>
                                     {user?.EsAdmin && (
                                         <li>
-                                            <Link to="/admin">Panel Admin</Link>
+                                            <Link to="/admin" onClick={closeMobileNav}>Panel Admin</Link>
                                         </li>
                                     )}
                                     <li>
-                                        <a href="#" onClick={(e) => { e.preventDefault(); logout(); }}>
+                                        <a href="#" onClick={(e) => { e.preventDefault(); logout(); closeMobileNav(); }}>
                                             Cerrar Sesión
                                         </a>
                                     </li>
@@ -56,7 +68,7 @@ const Header: React.FC = () => {
                             </li>
                         )}
                     </ul>
-                    <i className="mobile-nav-toggle d-xl-none bi bi-list"></i>
+                    <i className={`mobile-nav-toggle d-xl-none bi ${isMobileNavActive ? 'bi-x' : 'bi-list'}`} onClick={toggleMobileNav}></i>
                 </nav>
 
                 <Link className="btn-shopping-cart" to="/cart">
