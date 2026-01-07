@@ -1,27 +1,31 @@
 import React, { useState } from 'react';
 import type { Tour } from '../types/Tour';
+import { useToast } from '../context/ToastContext';
 
 interface TourCardProps {
     tour: Tour;
     onAddToCart: (tourId: string, adults: number, children: number, date: string) => Promise<void>;
 }
 
+const DEFAULT_TOUR_IMAGE = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=300&fit=crop';
+
 const TourCard: React.FC<TourCardProps> = ({ tour, onAddToCart }) => {
     const [adults, setAdults] = useState(1);
     const [children, setChildren] = useState(0);
     const [date, setDate] = useState('');
     const [loading, setLoading] = useState(false);
+    const [imageError, setImageError] = useState(false);
+    const { showError, showWarning } = useToast();
 
     const handleAddToCart = async () => {
         if (!date) {
-            alert('Por favor selecciona una fecha para tu reserva.');
+            showWarning('Por favor selecciona una fecha para tu reserva.');
             return;
         }
 
-        // Val idate past dates
         const today = new Date().toISOString().split('T')[0];
         if (date < today) {
-            alert('No puedes seleccionar una fecha pasada.');
+            showWarning('No puedes seleccionar una fecha pasada.');
             return;
         }
 
@@ -29,10 +33,22 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onAddToCart }) => {
         try {
             await onAddToCart(tour.IdPaquete, adults, children, date);
         } catch (error: any) {
-            alert('Error al agregar al carrito: ' + error.message);
+            showError('Error al agregar al carrito. Por favor intenta de nuevo.');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleImageError = () => {
+        setImageError(true);
+    };
+
+    const getImageSrc = () => {
+        if (imageError) return DEFAULT_TOUR_IMAGE;
+        if (!tour.ImagenUrl || tour.ImagenUrl === '' || tour.ImagenUrl === 'asset') {
+            return DEFAULT_TOUR_IMAGE;
+        }
+        return tour.ImagenUrl;
     };
 
     const today = new Date().toISOString().split('T')[0];
@@ -42,11 +58,12 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onAddToCart }) => {
             <div className="tour-card">
                 <div className="tour-image">
                     <img
-                        src={tour.ImagenUrl || '/assets/img/travel/tour-1.webp'}
+                        src={getImageSrc()}
                         alt={tour.Nombre}
                         className="img-fluid"
                         style={{ height: '250px', objectFit: 'cover', width: '100%' }}
                         loading="lazy"
+                        onError={handleImageError}
                     />
                     <div className="tour-price">${tour.PrecioActual}</div>
                 </div>

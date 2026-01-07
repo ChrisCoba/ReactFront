@@ -26,60 +26,70 @@ const Login: React.FC = () => {
     };
 
     return (
-        <section className="login section">
-            <div className="container">
-                <div className="row justify-content-center">
-                    <div className="col-lg-5 col-md-8">
-                        <div className="card shadow">
-                            <div className="card-body p-5">
-                                <h2 className="text-center mb-4">Iniciar Sesión</h2>
+        <section className="auth-section">
+            <div className="auth-container">
+                {/* Left Side - Illustration */}
+                <div className="auth-illustration">
+                    <div className="auth-illustration-content">
+                        <div className="auth-blob auth-blob-1"></div>
+                        <div className="auth-blob auth-blob-2"></div>
+                        <div className="auth-illustration-icon">
+                            <i className="bi bi-person-circle"></i>
+                        </div>
+                        <h3>¡Bienvenido de vuelta!</h3>
+                        <p>Explora los mejores destinos del mundo con WorldAgency</p>
+                    </div>
+                </div>
 
-                                {error && (
-                                    <div className="alert alert-danger" role="alert">
-                                        {error}
-                                    </div>
-                                )}
+                {/* Right Side - Form */}
+                <div className="auth-form-side">
+                    <div className="auth-form-container">
+                        <h2>Inicio de Sesión</h2>
 
-                                <form onSubmit={handleSubmit}>
-                                    <div className="mb-3">
-                                        <label htmlFor="email" className="form-label">
-                                            Correo Electrónico
-                                        </label>
-                                        <input
-                                            type="email"
-                                            className="form-control"
-                                            id="email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="mb-3">
-                                        <label htmlFor="password" className="form-label">
-                                            Contraseña
-                                        </label>
-                                        <input
-                                            type="password"
-                                            className="form-control"
-                                            id="password"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-
-                                    <button type="submit" className="btn btn-primary w-100" disabled={loading}>
-                                        {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-                                    </button>
-                                </form>
-
-                                <div className="text-center mt-3">
-                                    <p>
-                                        ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
-                                    </p>
-                                </div>
+                        {error && (
+                            <div className="alert alert-danger" role="alert">
+                                {error}
                             </div>
+                        )}
+
+                        <form onSubmit={handleSubmit}>
+                            <div className="auth-input-group">
+                                <label htmlFor="email">
+                                    <i className="bi bi-envelope"></i> Correo Electrónico
+                                </label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="tu@correo.com"
+                                    required
+                                />
+                            </div>
+
+                            <div className="auth-input-group">
+                                <label htmlFor="password">
+                                    <i className="bi bi-lock"></i> Contraseña
+                                </label>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    required
+                                />
+                            </div>
+
+                            <button type="submit" className="auth-submit-btn" disabled={loading}>
+                                {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                            </button>
+                        </form>
+
+                        <div className="auth-footer">
+                            <p>
+                                ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
+                            </p>
                         </div>
                     </div>
                 </div>

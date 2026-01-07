@@ -5,6 +5,7 @@ import { GET_PACKAGES } from '../graphql/queries';
 import { ReservasService } from '../services/ReservasService';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
+import { useToast } from '../context/ToastContext';
 import TourCard from '../components/TourCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import type { Tour } from '../types/Tour';
@@ -19,6 +20,7 @@ const Tours: React.FC = () => {
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
     const { addToCart } = useCart();
+    const { showSuccess, showError, showWarning } = useToast();
 
     // Filters
     const [filterDestination, setFilterDestination] = useState(searchParams.get('destination') || '');
@@ -68,8 +70,8 @@ const Tours: React.FC = () => {
         }
 
         if (filterPrice) {
-            const maxPrice = parseInt(filterPrice);
-            filtered = filtered.filter((tour) => tour.PrecioActual <= maxPrice);
+            const [minPrice, maxPrice] = filterPrice.split('-').map(Number);
+            filtered = filtered.filter((tour) => tour.PrecioActual >= minPrice && tour.PrecioActual <= maxPrice);
         }
 
         if (filterDuration) {
@@ -82,19 +84,21 @@ const Tours: React.FC = () => {
 
     const handleAddToCart = async (tourId: string, adults: number, children: number, date: string) => {
         if (!isAuthenticated) {
-            alert('Debes iniciar sesión para hacer una reserva.');
+            showWarning('Debes iniciar sesión para hacer una reserva.');
             navigate('/login');
             return;
         }
 
         const tour = tours.find((t) => t.IdPaquete === tourId);
-        if (!tour) throw new Error('Tour no encontrado');
+        if (!tour) {
+            showError('Tour no encontrado.');
+            return;
+        }
 
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const totalPersonas = adults + children;
 
         try {
-            // Keep using REST for writes (Mutations not available yet)
             const holdData = {
                 IdPaquete: tourId,
                 BookingUserId: user.Email,
@@ -127,15 +131,10 @@ const Tours: React.FC = () => {
                 reserva.IdReserva
             );
 
-            const availabilityMsg = holdResponse.CuposDisponibles !== undefined
-                ? `\n\nCupos disponibles para esta fecha: ${holdResponse.CuposDisponibles}`
-                : '';
-
-            if (confirm(`Agregado al carrito: ${tour.Nombre} para ${date}${availabilityMsg}\n¿Deseas ver tu carrito?`)) {
-                navigate('/cart');
-            }
+            showSuccess(`"${tour.Nombre}" agregado al carrito para ${date}`);
+            navigate('/cart');
         } catch (err: any) {
-            alert(`Error al reservar: ${err.message}`);
+            showError('Error al reservar. Por favor intenta de nuevo.');
         }
     };
 
@@ -172,11 +171,8 @@ const Tours: React.FC = () => {
                             onChange={(e) => setFilterType(e.target.value)}
                         >
                             <option value="">Tipo de actividad</option>
-                            <option value="Aventura">Aventura</option>
-                            <option value="Cultural">Cultural</option>
-                            <option value="Relajación">Relajación</option>
-                            <option value="Naturaleza">Naturaleza</option>
-                            <option value="Gastronomía">Gastronomía</option>
+                            <option value="Interiores">Interiores</option>
+                            <option value="Aire Libre">Aire Libre</option>
                         </select>
                     </div>
                     <div className="col-md-3">
@@ -186,10 +182,9 @@ const Tours: React.FC = () => {
                             onChange={(e) => setFilterPrice(e.target.value)}
                         >
                             <option value="">Rango de precio</option>
-                            <option value="100">Hasta $100</option>
-                            <option value="300">Hasta $300</option>
-                            <option value="500">Hasta $500</option>
-                            <option value="1000">Hasta $1000</option>
+                            <option value="0-50">Hasta $50</option>
+                            <option value="51-80">$51 - $80</option>
+                            <option value="81-150">$81 - $150</option>
                         </select>
                     </div>
                     <div className="col-md-3">

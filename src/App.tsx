@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { ToastProvider } from './context/ToastContext';
 import Layout from './components/Layout/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -22,46 +23,48 @@ function App() {
     <Router>
       <AuthProvider>
         <CartProvider>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              {/* Public routes */}
-              <Route index element={<Home />} />
-              <Route path="tours" element={<Tours />} />
-              <Route path="destinations" element={<Destinations />} />
-              <Route path="about" element={<About />} />
-              <Route path="login" element={<Login />} />
-              <Route path="register" element={<Register />} />
+          <ToastProvider>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                {/* Public routes */}
+                <Route index element={<Home />} />
+                <Route path="tours" element={<Tours />} />
+                <Route path="destinations" element={<Destinations />} />
+                <Route path="about" element={<About />} />
+                <Route path="login" element={<Login />} />
+                <Route path="register" element={<Register />} />
 
-              {/* Protected routes */}
-              <Route
-                path="cart"
-                element={
-                  <ProtectedRoute>
-                    <Cart />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="profile"
-                element={
-                  <ProtectedRoute>
-                    <UserProfile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="admin"
-                element={
-                  <ProtectedRoute requireAdmin>
-                    <Admin />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Protected routes */}
+                <Route
+                  path="cart"
+                  element={
+                    <ProtectedRoute>
+                      <Cart />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="profile"
+                  element={
+                    <ProtectedRoute>
+                      <UserProfile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="admin"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <Admin />
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
+                {/* 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+          </ToastProvider>
         </CartProvider>
       </AuthProvider>
     </Router>

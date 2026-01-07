@@ -35,21 +35,21 @@ const About: React.FC = () => {
 
                 <div className="row text-center">
                     <div className="col-lg-4 mb-4">
-                        <div className="feature-card p-4">
+                        <div className="about-feature-card">
                             <i className="bi bi-award-fill display-4 text-primary mb-3"></i>
                             <h4>Experiencia</h4>
                             <p>Más de 10 años en la industria turística</p>
                         </div>
                     </div>
                     <div className="col-lg-4 mb-4">
-                        <div className="feature-card p-4">
+                        <div className="about-feature-card">
                             <i className="bi bi-people-fill display-4 text-primary mb-3"></i>
                             <h4>Clientes Satisfechos</h4>
                             <p>Miles de viajeros felices cada año</p>
                         </div>
                     </div>
                     <div className="col-lg-4 mb-4">
-                        <div className="feature-card p-4">
+                        <div className="about-feature-card">
                             <i className="bi bi-globe display-4 text-primary mb-3"></i>
                             <h4>Destinos</h4>
                             <p>Tours a más de 50 países en todo el mundo</p>
