@@ -96,12 +96,10 @@ const Header: React.FC = () => {
             </div>
 
             {/* Floating Cart Button - top right corner (below auth buttons) */}
-            {isAuthenticated && (
-                <Link className="floating-cart-btn" to="/cart" onClick={closeMobileNav}>
-                    <i className="bi bi-cart"></i>
-                    {cartCount > 0 && <span className="badge bg-danger">{cartCount}</span>}
-                </Link>
-            )}
+            <Link className="floating-cart-btn" to="/cart" onClick={closeMobileNav}>
+                <i className="bi bi-cart"></i>
+                {cartCount > 0 && <span className="badge bg-danger">{cartCount}</span>}
+            </Link>
         </header>
     );
 };

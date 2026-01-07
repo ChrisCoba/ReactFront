@@ -1032,3 +1032,15 @@ h6 {
   background: rgba(255, 255, 255, 0.1); /* Lighter background for the container on dark header */
   box-shadow: none;
 }
+
+/* Prevent Nav overlap with fixed buttons */
+.header .header-container {
+  padding-right: 280px; /* Reserve space for auth buttons/cart on right */
+}
+
+/* Adjust for smaller screens where layout changes */
+@media (max-width: 1200px) {
+  .header .header-container {
+      padding-right: 60px; /* Less padding needed on mobile as auth buttons hide/move */
+  }
+}
