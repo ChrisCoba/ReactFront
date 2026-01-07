@@ -109,16 +109,7 @@ const Tours: React.FC = () => {
 
             const holdResponse = await ReservasService.hold(holdData);
 
-            const bookData = {
-                IdPaquete: tourId,
-                HoldId: holdResponse.HoldId,
-                BookingUserId: user.Email,
-                MetodoPago: 'Pendiente',
-                Turistas: [],
-            };
-
-            const reserva = await ReservasService.book(bookData);
-
+            // We only create a Hold here. Payment and Confirmation happen in Cart.
             addToCart(
                 tourId,
                 tour.Nombre,
@@ -128,7 +119,7 @@ const Tours: React.FC = () => {
                 children,
                 date,
                 tour.ImagenUrl,
-                reserva.IdReserva
+                holdResponse.HoldId
             );
 
             showSuccess(`"${tour.Nombre}" agregado al carrito para ${date}`);
