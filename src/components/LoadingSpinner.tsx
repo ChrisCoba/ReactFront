@@ -9,7 +9,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ size = 'md', variant = 
     const sizeClass = size === 'sm' ? 'spinner-border-sm' : '';
 
     return (
-        <div className="text-center">
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
             <div className={`spinner-border text-${variant} ${sizeClass}`} role="status">
                 <span className="visually-hidden">Cargando...</span>
             </div>

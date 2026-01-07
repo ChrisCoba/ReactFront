@@ -12,7 +12,7 @@ interface Tour {
     ciudad: string;
     pais?: string;
     tipoActividad?: string;
-    activo?: boolean; // From GraphQL
+    activo?: boolean;
 }
 
 const PAGE_SIZE = 15;
@@ -30,7 +30,6 @@ export const ToursTable: React.FC = () => {
 
     const tours: Tour[] = data?.packages || [];
 
-    // Filter tours based on search term and status
     const filteredTours = useMemo(() => {
         return tours.filter(tour => {
             const matchesSearch =
@@ -39,7 +38,7 @@ export const ToursTable: React.FC = () => {
                 tour.ciudad?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 tour.tipoActividad?.toLowerCase().includes(searchTerm.toLowerCase());
 
-            const isActive = tour.activo !== false; // Default to active if not specified
+            const isActive = tour.activo !== false;
             const matchesStatus = statusFilter === 'all' ||
                 (statusFilter === 'active' && isActive) ||
                 (statusFilter === 'inactive' && !isActive);
@@ -57,14 +56,14 @@ export const ToursTable: React.FC = () => {
     };
 
     const handleDelete = async (id: number) => {
-        if (window.confirm('Are you sure you want to delete this tour?')) {
+        if (window.confirm('¿Estás seguro de que deseas eliminar este tour?')) {
             try {
                 await axios.delete(`https://worldagencyadmin.runasp.net/api/admin/servicios/${id}`);
-                alert('Tour deleted successfully');
+                alert('Tour eliminado exitosamente');
                 refetch();
             } catch (err) {
-                console.error('Error deleting tour:', err);
-                alert('Error deleting tour');
+                console.error('Error al eliminar tour:', err);
+                alert('Error al eliminar tour');
             }
         }
     };
@@ -74,7 +73,6 @@ export const ToursTable: React.FC = () => {
         setShowModal(true);
     };
 
-    // Reset to page 1 when search/filter changes
     const handleSearchChange = (value: string) => {
         setSearchTerm(value);
         setCurrentPage(1);
@@ -86,18 +84,18 @@ export const ToursTable: React.FC = () => {
     };
 
     if (loading) return <div className="text-center p-4"><div className="spinner-border" role="status"></div></div>;
-    if (error) return <div className="alert alert-danger">Error loading tours: {error.message}</div>;
+    if (error) return <div className="alert alert-danger">Error al cargar tours: {error.message}</div>;
 
     return (
         <div className="card shadow mb-4">
             <div className="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 className="m-0 font-weight-bold text-primary text-uppercase">Tours Management ({filteredTours.length} of {tours.length})</h6>
+                <h6 className="m-0 font-weight-bold text-primary text-uppercase">Gestión de Tours ({filteredTours.length} de {tours.length})</h6>
                 <button className="btn btn-primary btn-sm" onClick={handleCreate}>
-                    <i className="bi bi-plus-lg me-1"></i> New Tour
+                    <i className="bi bi-plus-lg me-1"></i> Nuevo Tour
                 </button>
             </div>
             <div className="card-body">
-                {/* Search and Filter Bar */}
+                {/* Barra de Búsqueda y Filtro */}
                 <div className="row mb-3">
                     <div className="col-md-8">
                         <div className="input-group">
@@ -105,7 +103,7 @@ export const ToursTable: React.FC = () => {
                             <input
                                 type="text"
                                 className="form-control"
-                                placeholder="Search by name, ID, city, or type..."
+                                placeholder="Buscar por nombre, ID, ciudad o tipo..."
                                 value={searchTerm}
                                 onChange={(e) => handleSearchChange(e.target.value)}
                             />
@@ -122,9 +120,9 @@ export const ToursTable: React.FC = () => {
                             value={statusFilter}
                             onChange={(e) => handleStatusFilterChange(e.target.value)}
                         >
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
+                            <option value="all">Todos los Estados</option>
+                            <option value="active">Activo</option>
+                            <option value="inactive">Inactivo</option>
                         </select>
                     </div>
                 </div>
@@ -134,13 +132,13 @@ export const ToursTable: React.FC = () => {
                         <thead className="table-light">
                             <tr>
                                 <th>ID</th>
-                                <th>Name</th>
-                                <th>City</th>
-                                <th>Price</th>
-                                <th>Duration</th>
-                                <th>Status</th>
-                                <th>Type</th>
-                                <th>Actions</th>
+                                <th>Nombre</th>
+                                <th>Ciudad</th>
+                                <th>Precio</th>
+                                <th>Duración</th>
+                                <th>Estado</th>
+                                <th>Tipo</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -150,10 +148,10 @@ export const ToursTable: React.FC = () => {
                                     <td>{tour.nombre}</td>
                                     <td>{tour.ciudad}</td>
                                     <td>${tour.precio}</td>
-                                    <td>{tour.duracion} days</td>
+                                    <td>{tour.duracion} días</td>
                                     <td>
                                         <span className={`badge ${tour.activo !== false ? 'bg-success' : 'bg-secondary'}`}>
-                                            {tour.activo !== false ? 'Active' : 'Inactive'}
+                                            {tour.activo !== false ? 'Activo' : 'Inactivo'}
                                         </span>
                                     </td>
                                     <td>{tour.tipoActividad || 'N/A'}</td>
@@ -167,18 +165,18 @@ export const ToursTable: React.FC = () => {
                                     </td>
                                 </tr>
                             )) : (
-                                <tr><td colSpan={8} className="text-center p-3">No tours found</td></tr>
+                                <tr><td colSpan={8} className="text-center p-3">No se encontraron tours</td></tr>
                             )}
                         </tbody>
                     </table>
                 </div>
 
-                {/* Pagination */}
+                {/* Paginación */}
                 {totalPages > 1 && (
-                    <nav aria-label="Tours pagination">
+                    <nav aria-label="Paginación de tours">
                         <ul className="pagination justify-content-center mb-0">
                             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                <button className="page-link" onClick={() => setCurrentPage(p => p - 1)}>Previous</button>
+                                <button className="page-link" onClick={() => setCurrentPage(p => p - 1)}>Anterior</button>
                             </li>
                             {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                                 <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
@@ -186,7 +184,7 @@ export const ToursTable: React.FC = () => {
                                 </li>
                             ))}
                             <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                <button className="page-link" onClick={() => setCurrentPage(p => p + 1)}>Next</button>
+                                <button className="page-link" onClick={() => setCurrentPage(p => p + 1)}>Siguiente</button>
                             </li>
                         </ul>
                     </nav>

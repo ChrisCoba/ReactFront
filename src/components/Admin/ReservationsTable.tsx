@@ -36,7 +36,6 @@ export const ReservationsTable: React.FC = () => {
 
     const reservations: Reservation[] = data?.reservations || [];
 
-    // Filter reservations based on search term and status
     const filteredReservations = useMemo(() => {
         return reservations.filter(res => {
             const clientName = `${res.cliente?.profile?.nombre || ''} ${res.cliente?.profile?.apellido || ''}`.toLowerCase();
@@ -60,22 +59,21 @@ export const ReservationsTable: React.FC = () => {
     const paginatedReservations = filteredReservations.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
     const handleCancel = async (id: number) => {
-        const reason = prompt('Please enter a reason for cancellation:');
+        const reason = prompt('Por favor ingrese el motivo de la cancelación:');
         if (reason) {
             try {
                 await axios.post(`https://worldagencyadmin.runasp.net/api/admin/reservas/${id}/cancelar`, JSON.stringify(reason), {
                     headers: { 'Content-Type': 'application/json' }
                 });
-                alert('Reservation cancelled successfully');
+                alert('Reserva cancelada exitosamente');
                 refetch();
             } catch (err) {
-                console.error('Error cancelling reservation:', err);
-                alert('Error cancelling reservation');
+                console.error('Error al cancelar reserva:', err);
+                alert('Error al cancelar reserva');
             }
         }
     };
 
-    // Reset to page 1 when search/filter changes
     const handleSearchChange = (value: string) => {
         setSearchTerm(value);
         setCurrentPage(1);
@@ -87,15 +85,15 @@ export const ReservationsTable: React.FC = () => {
     };
 
     if (loading) return <div className="text-center p-4"><div className="spinner-border" role="status"></div></div>;
-    if (error) return <div className="alert alert-danger">Error loading reservations: {error.message}</div>;
+    if (error) return <div className="alert alert-danger">Error al cargar reservas: {error.message}</div>;
 
     return (
         <div className="card shadow mb-4">
             <div className="card-header py-3">
-                <h6 className="m-0 font-weight-bold text-primary text-uppercase">Reservations Management ({filteredReservations.length} of {reservations.length})</h6>
+                <h6 className="m-0 font-weight-bold text-primary text-uppercase">Gestión de Reservas ({filteredReservations.length} de {reservations.length})</h6>
             </div>
             <div className="card-body">
-                {/* Search and Filter Bar */}
+                {/* Barra de Búsqueda y Filtro */}
                 <div className="row mb-3">
                     <div className="col-md-8">
                         <div className="input-group">
@@ -103,7 +101,7 @@ export const ReservationsTable: React.FC = () => {
                             <input
                                 type="text"
                                 className="form-control"
-                                placeholder="Search by code, ID, client name, or package..."
+                                placeholder="Buscar por código, ID, cliente o paquete..."
                                 value={searchTerm}
                                 onChange={(e) => handleSearchChange(e.target.value)}
                             />
@@ -120,10 +118,10 @@ export const ReservationsTable: React.FC = () => {
                             value={statusFilter}
                             onChange={(e) => handleStatusFilterChange(e.target.value)}
                         >
-                            <option value="all">All Status</option>
-                            <option value="confirmado">Confirmed</option>
-                            <option value="pendiente">Pending</option>
-                            <option value="cancelado">Cancelled</option>
+                            <option value="all">Todos los Estados</option>
+                            <option value="confirmado">Confirmado</option>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="cancelado">Cancelado</option>
                         </select>
                     </div>
                 </div>
@@ -133,13 +131,13 @@ export const ReservationsTable: React.FC = () => {
                         <thead className="table-light">
                             <tr>
                                 <th>ID</th>
-                                <th>Code</th>
-                                <th>Client</th>
-                                <th>Package</th>
-                                <th>Date</th>
+                                <th>Código</th>
+                                <th>Cliente</th>
+                                <th>Paquete</th>
+                                <th>Fecha</th>
                                 <th>Total</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -157,7 +155,7 @@ export const ReservationsTable: React.FC = () => {
                                         <br />
                                         <small className="text-muted">{res.package?.ciudad}</small>
                                     </td>
-                                    <td>{new Date(res.fechaReserva).toLocaleDateString()}</td>
+                                    <td>{new Date(res.fechaReserva).toLocaleDateString('es-ES')}</td>
                                     <td>${res.total.toFixed(2)}</td>
                                     <td>
                                         <span className={`badge ${res.estado === 'Confirmada' || res.estado === 'Confirmado' ? 'bg-success' :
@@ -169,25 +167,25 @@ export const ReservationsTable: React.FC = () => {
                                     </td>
                                     <td>
                                         {res.estado !== 'Cancelada' && res.estado !== 'Cancelado' && (
-                                            <button className="btn btn-sm btn-danger" onClick={() => handleCancel(res.id)} title="Cancel">
+                                            <button className="btn btn-sm btn-danger" onClick={() => handleCancel(res.id)} title="Cancelar">
                                                 <i className="bi bi-x-circle"></i>
                                             </button>
                                         )}
                                     </td>
                                 </tr>
                             )) : (
-                                <tr><td colSpan={8} className="text-center p-3">No reservations found</td></tr>
+                                <tr><td colSpan={8} className="text-center p-3">No se encontraron reservas</td></tr>
                             )}
                         </tbody>
                     </table>
                 </div>
 
-                {/* Pagination */}
+                {/* Paginación */}
                 {totalPages > 1 && (
-                    <nav aria-label="Reservations pagination">
+                    <nav aria-label="Paginación de reservas">
                         <ul className="pagination justify-content-center mb-0">
                             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                <button className="page-link" onClick={() => setCurrentPage(p => p - 1)}>Previous</button>
+                                <button className="page-link" onClick={() => setCurrentPage(p => p - 1)}>Anterior</button>
                             </li>
                             {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                                 <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
@@ -195,7 +193,7 @@ export const ReservationsTable: React.FC = () => {
                                 </li>
                             ))}
                             <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                <button className="page-link" onClick={() => setCurrentPage(p => p + 1)}>Next</button>
+                                <button className="page-link" onClick={() => setCurrentPage(p => p + 1)}>Siguiente</button>
                             </li>
                         </ul>
                     </nav>

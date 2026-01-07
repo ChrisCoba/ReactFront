@@ -14,8 +14,7 @@ interface User {
     id: number;
     email: string;
     profile?: UserProfile;
-    totalSpent?: number;
-    activo?: boolean; // From GraphQL
+    activo?: boolean;
 }
 
 const PAGE_SIZE = 15;
@@ -34,7 +33,6 @@ export const UsersTable: React.FC = () => {
 
     const users: User[] = data?.users || [];
 
-    // Filter users based on search term and status
     const filteredUsers = useMemo(() => {
         return users.filter(user => {
             const fullName = `${user.profile?.nombre || ''} ${user.profile?.apellido || ''}`.toLowerCase();
@@ -43,7 +41,7 @@ export const UsersTable: React.FC = () => {
                 user.id.toString().includes(searchTerm) ||
                 user.email.toLowerCase().includes(searchTerm.toLowerCase());
 
-            const isActive = user.activo !== false; // Default to active if not specified
+            const isActive = user.activo !== false;
             const matchesStatus = statusFilter === 'all' ||
                 (statusFilter === 'active' && isActive) ||
                 (statusFilter === 'inactive' && !isActive);
@@ -67,14 +65,14 @@ export const UsersTable: React.FC = () => {
     };
 
     const handleDelete = async (id: number) => {
-        if (window.confirm('Are you sure you want to delete this user?')) {
+        if (window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
             try {
                 await axios.delete(`https://worldagencyadmin.runasp.net/api/admin/usuarios/${id}`);
-                alert('User deleted successfully');
+                alert('Usuario eliminado exitosamente');
                 refetch();
             } catch (err) {
-                console.error('Error deleting user:', err);
-                alert('Error deleting user');
+                console.error('Error al eliminar usuario:', err);
+                alert('Error al eliminar usuario');
             }
         }
     };
@@ -84,7 +82,6 @@ export const UsersTable: React.FC = () => {
         setShowModal(true);
     };
 
-    // Reset to page 1 when search/filter changes
     const handleSearchChange = (value: string) => {
         setSearchTerm(value);
         setCurrentPage(1);
@@ -96,18 +93,18 @@ export const UsersTable: React.FC = () => {
     };
 
     if (loading) return <div className="text-center p-4"><div className="spinner-border" role="status"></div></div>;
-    if (error) return <div className="alert alert-danger">Error loading users: {error.message}</div>;
+    if (error) return <div className="alert alert-danger">Error al cargar usuarios: {error.message}</div>;
 
     return (
         <div className="card shadow mb-4">
             <div className="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 className="m-0 font-weight-bold text-primary text-uppercase">Users Management ({filteredUsers.length} of {users.length})</h6>
+                <h6 className="m-0 font-weight-bold text-primary text-uppercase">Gestión de Usuarios ({filteredUsers.length} de {users.length})</h6>
                 <button className="btn btn-primary btn-sm" onClick={handleCreate}>
-                    <i className="bi bi-plus-lg me-1"></i> New User
+                    <i className="bi bi-plus-lg me-1"></i> Nuevo Usuario
                 </button>
             </div>
             <div className="card-body">
-                {/* Search and Filter Bar */}
+                {/* Barra de Búsqueda y Filtro */}
                 <div className="row mb-3">
                     <div className="col-md-8">
                         <div className="input-group">
@@ -115,7 +112,7 @@ export const UsersTable: React.FC = () => {
                             <input
                                 type="text"
                                 className="form-control"
-                                placeholder="Search by name, ID, or email..."
+                                placeholder="Buscar por nombre, ID o email..."
                                 value={searchTerm}
                                 onChange={(e) => handleSearchChange(e.target.value)}
                             />
@@ -132,9 +129,9 @@ export const UsersTable: React.FC = () => {
                             value={statusFilter}
                             onChange={(e) => handleStatusFilterChange(e.target.value)}
                         >
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
+                            <option value="all">Todos los Estados</option>
+                            <option value="active">Activo</option>
+                            <option value="inactive">Inactivo</option>
                         </select>
                     </div>
                 </div>
@@ -144,11 +141,10 @@ export const UsersTable: React.FC = () => {
                         <thead className="table-light">
                             <tr>
                                 <th>ID</th>
-                                <th>Name</th>
+                                <th>Nombre</th>
                                 <th>Email</th>
-                                <th>Status</th>
-                                <th>Total Spent</th>
-                                <th>Actions</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -159,10 +155,9 @@ export const UsersTable: React.FC = () => {
                                     <td>{user.email}</td>
                                     <td>
                                         <span className={`badge ${user.activo !== false ? 'bg-success' : 'bg-secondary'}`}>
-                                            {user.activo !== false ? 'Active' : 'Inactive'}
+                                            {user.activo !== false ? 'Activo' : 'Inactivo'}
                                         </span>
                                     </td>
-                                    <td>${user.totalSpent?.toFixed(2) || '0.00'}</td>
                                     <td>
                                         <button className="btn btn-sm btn-info me-2" onClick={() => handleEdit(user)}>
                                             <i className="bi bi-pencil"></i>
@@ -173,18 +168,18 @@ export const UsersTable: React.FC = () => {
                                     </td>
                                 </tr>
                             )) : (
-                                <tr><td colSpan={6} className="text-center p-3">No users found</td></tr>
+                                <tr><td colSpan={5} className="text-center p-3">No se encontraron usuarios</td></tr>
                             )}
                         </tbody>
                     </table>
                 </div>
 
-                {/* Pagination */}
+                {/* Paginación */}
                 {totalPages > 1 && (
-                    <nav aria-label="Users pagination">
+                    <nav aria-label="Paginación de usuarios">
                         <ul className="pagination justify-content-center mb-0">
                             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                <button className="page-link" onClick={() => setCurrentPage(p => p - 1)}>Previous</button>
+                                <button className="page-link" onClick={() => setCurrentPage(p => p - 1)}>Anterior</button>
                             </li>
                             {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                                 <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
@@ -192,7 +187,7 @@ export const UsersTable: React.FC = () => {
                                 </li>
                             ))}
                             <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                <button className="page-link" onClick={() => setCurrentPage(p => p + 1)}>Next</button>
+                                <button className="page-link" onClick={() => setCurrentPage(p => p + 1)}>Siguiente</button>
                             </li>
                         </ul>
                     </nav>
