@@ -50,7 +50,7 @@ export const GET_PACKAGE_BY_ID = gql`
 
 export const GET_USER_DASHBOARD = gql`
   ${USER_FIELDS}
-  query GetUserDashboard($userId: String!) {
+  query GetUserDashboard($userId: Int!) {
     user(id: $userId) {
       ...UserFields
       totalSpent

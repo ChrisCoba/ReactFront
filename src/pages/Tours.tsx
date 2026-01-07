@@ -41,7 +41,7 @@ const Tours: React.FC = () => {
                 Descripcion: pkg.descripcion,
                 PrecioActual: pkg.precio,
                 Duracion: pkg.duracion,
-                ImagenUrl: pkg.imagen || 'https://via.placeholder.com/400x300?text=Tour',
+                ImagenUrl: pkg.imagen || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=300&fit=crop',
                 FechaInicio: pkg.fechaInicio,
                 TipoActividad: pkg.tipoActividad,
                 CuposDisponibles: pkg.cuposDisponibles,

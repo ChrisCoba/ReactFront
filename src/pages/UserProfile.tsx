@@ -9,8 +9,8 @@ const UserProfile: React.FC = () => {
 
     // Use GraphQL to fetch enriched profile data (total spent, bookings)
     const { data, loading, error, refetch } = useQuery(GET_USER_DASHBOARD, {
-        variables: { userId: user?.Email || '0' },
-        skip: !user?.Email
+        variables: { userId: user?.Id || 0 },
+        skip: !user?.Id
     });
 
     useEffect(() => {
