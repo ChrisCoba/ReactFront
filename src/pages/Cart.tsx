@@ -36,8 +36,9 @@ const Cart: React.FC = () => {
 
                 // Create Hold
                 const holdResponse = await ReservasService.hold(holdData);
-                if (!holdResponse.Exito || !holdResponse.HoldId) {
-                    throw new Error(`Error reservando ${item.name}: ${holdResponse.Mensaje}`);
+                // Backend returns the object directly, likely without Exito property if success is standard 201/200
+                if (!holdResponse.HoldId) {
+                    throw new Error(`Error reservando ${item.name}: ${holdResponse.Mensaje || 'No se recibió ID de reserva'}`);
                 }
 
                 // Pay
