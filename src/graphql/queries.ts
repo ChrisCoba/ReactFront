@@ -10,6 +10,7 @@ const PACKAGE_FIELDS = gql`
     precio
     duracion
     tipoActividad
+    activo
   }
 `;
 
@@ -17,6 +18,7 @@ const USER_FIELDS = gql`
   fragment UserFields on User {
     id
     email
+    activo
     profile {
       nombre
       apellido

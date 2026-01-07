@@ -15,7 +15,7 @@ interface User {
     email: string;
     profile?: UserProfile;
     totalSpent?: number;
-    activo?: boolean;
+    activo?: boolean; // From GraphQL
 }
 
 const PAGE_SIZE = 15;

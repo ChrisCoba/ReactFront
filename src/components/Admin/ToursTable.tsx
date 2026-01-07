@@ -12,7 +12,7 @@ interface Tour {
     ciudad: string;
     pais?: string;
     tipoActividad?: string;
-    estado?: boolean;
+    activo?: boolean; // From GraphQL
 }
 
 const PAGE_SIZE = 15;
@@ -39,7 +39,7 @@ export const ToursTable: React.FC = () => {
                 tour.ciudad?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 tour.tipoActividad?.toLowerCase().includes(searchTerm.toLowerCase());
 
-            const isActive = tour.estado !== false; // Default to active if not specified
+            const isActive = tour.activo !== false; // Default to active if not specified
             const matchesStatus = statusFilter === 'all' ||
                 (statusFilter === 'active' && isActive) ||
                 (statusFilter === 'inactive' && !isActive);
@@ -152,8 +152,8 @@ export const ToursTable: React.FC = () => {
                                     <td>${tour.precio}</td>
                                     <td>{tour.duracion} days</td>
                                     <td>
-                                        <span className={`badge ${tour.estado !== false ? 'bg-success' : 'bg-secondary'}`}>
-                                            {tour.estado !== false ? 'Active' : 'Inactive'}
+                                        <span className={`badge ${tour.activo !== false ? 'bg-success' : 'bg-secondary'}`}>
+                                            {tour.activo !== false ? 'Active' : 'Inactive'}
                                         </span>
                                     </td>
                                     <td>{tour.tipoActividad || 'N/A'}</td>
