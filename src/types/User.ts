@@ -5,6 +5,7 @@ export interface User {
   Nombre: string;
   Apellido: string;
   EsAdmin: boolean;
+  Telefono?: string;
 }
 
 export interface LoginCredentials {

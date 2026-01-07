@@ -2,10 +2,20 @@ import React, { useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_USER_DASHBOARD } from '../graphql/queries';
 import { useAuth } from '../hooks/useAuth';
+import { AuthService } from '../services/AuthService';
+import { useToast } from '../context/ToastContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const UserProfile: React.FC = () => {
     const { user } = useAuth();
+    const { showSuccess, showError } = useToast();
+    const [isEditing, setIsEditing] = React.useState(false);
+    const [editForm, setEditForm] = React.useState({
+        Nombre: '',
+        Apellido: '',
+        Telefono: '',
+        password: ''
+    });
 
     // Use GraphQL to fetch enriched profile data (total spent, bookings)
     const { data, loading, error, refetch } = useQuery(GET_USER_DASHBOARD, {
@@ -25,12 +35,35 @@ const UserProfile: React.FC = () => {
     const userData = data?.user;
     const bookings = userData?.bookings || [];
 
+    const handleEditClick = () => {
+        setEditForm({
+            Nombre: userData?.profile?.nombre || '',
+            Apellido: userData?.profile?.apellido || '',
+            Telefono: userData?.profile?.telefono || '',
+            password: ''
+        });
+        setIsEditing(true);
+    };
+
+    const handleSaveProfile = async () => {
+        try {
+            if (!user?.Id) return;
+            await AuthService.updateProfile(user.Id, editForm);
+            showSuccess('Perfil actualizado con éxito');
+            setIsEditing(false);
+            refetch();
+        } catch (err: any) {
+            showError(err.message || 'Error al actualizar perfil');
+        }
+    };
+
     return (
         <section className="profile section">
             <div className="container">
                 <div className="row">
                     {/* Sidebar Profile Info */}
                     <div className="col-lg-4 mb-4">
+                        {/* ... Existing Sidebar ... */}
                         <div className="card shadow-sm h-100">
                             <div className="card-body text-center p-4">
                                 <div className="mb-3">
@@ -53,30 +86,94 @@ const UserProfile: React.FC = () => {
                     {/* Main Content */}
                     <div className="col-lg-8">
                         <div className="card shadow-sm mb-4">
-                            <div className="card-header bg-white py-3">
+                            <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                                 <h5 className="mb-0">Información Personal</h5>
+                                {!isEditing && (
+                                    <button className="btn btn-outline-primary btn-sm" onClick={handleEditClick}>
+                                        <i className="bi bi-pencil-square me-2"></i>Editar
+                                    </button>
+                                )}
                             </div>
                             <div className="card-body">
-                                <div className="row mb-3">
-                                    <div className="col-sm-3"><strong>Nombre:</strong></div>
-                                    <div className="col-sm-9">{userData?.profile?.nombre}</div>
-                                </div>
-                                <div className="row mb-3">
-                                    <div className="col-sm-3"><strong>Apellido:</strong></div>
-                                    <div className="col-sm-9">{userData?.profile?.apellido}</div>
-                                </div>
-                                <div className="row mb-3">
-                                    <div className="col-sm-3"><strong>Teléfono:</strong></div>
-                                    <div className="col-sm-9">{userData?.profile?.telefono || 'No registrado'}</div>
-                                </div>
-                                <div className="row mb-3">
-                                    <div className="col-sm-3"><strong>Fecha Registro:</strong></div>
-                                    <div className="col-sm-9">
-                                        {userData?.profile?.fechaRegistro
-                                            ? new Date(userData.profile.fechaRegistro).toLocaleDateString()
-                                            : 'N/A'}
-                                    </div>
-                                </div>
+                                {isEditing ? (
+                                    <form onSubmit={(e) => { e.preventDefault(); handleSaveProfile(); }}>
+                                        <div className="row mb-3">
+                                            <div className="col-sm-3 col-form-label">Nombre</div>
+                                            <div className="col-sm-9">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    value={editForm.Nombre}
+                                                    onChange={(e) => setEditForm({ ...editForm, Nombre: e.target.value })}
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="row mb-3">
+                                            <div className="col-sm-3 col-form-label">Apellido</div>
+                                            <div className="col-sm-9">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    value={editForm.Apellido}
+                                                    onChange={(e) => setEditForm({ ...editForm, Apellido: e.target.value })}
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="row mb-3">
+                                            <div className="col-sm-3 col-form-label">Teléfono</div>
+                                            <div className="col-sm-9">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    value={editForm.Telefono}
+                                                    onChange={(e) => setEditForm({ ...editForm, Telefono: e.target.value })}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="row mb-3">
+                                            <div className="col-sm-3 col-form-label">Nueva Contraseña</div>
+                                            <div className="col-sm-9">
+                                                <input
+                                                    type="password"
+                                                    className="form-control"
+                                                    placeholder="Dejar vacía para mantener la actual"
+                                                    value={editForm.password}
+                                                    onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                                                />
+                                                <small className="text-muted">Min. 6 caracteres si se cambia.</small>
+                                            </div>
+                                        </div>
+                                        <div className="text-end">
+                                            <button type="button" className="btn btn-secondary me-2" onClick={() => setIsEditing(false)}>Cancelar</button>
+                                            <button type="submit" className="btn btn-primary">Guardar Cambios</button>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    <>
+                                        <div className="row mb-3">
+                                            <div className="col-sm-3"><strong>Nombre:</strong></div>
+                                            <div className="col-sm-9">{userData?.profile?.nombre}</div>
+                                        </div>
+                                        <div className="row mb-3">
+                                            <div className="col-sm-3"><strong>Apellido:</strong></div>
+                                            <div className="col-sm-9">{userData?.profile?.apellido}</div>
+                                        </div>
+                                        <div className="row mb-3">
+                                            <div className="col-sm-3"><strong>Teléfono:</strong></div>
+                                            <div className="col-sm-9">{userData?.profile?.telefono || 'No registrado'}</div>
+                                        </div>
+                                        <div className="row mb-3">
+                                            <div className="col-sm-3"><strong>Fecha Registro:</strong></div>
+                                            <div className="col-sm-9">
+                                                {userData?.profile?.fechaRegistro
+                                                    ? new Date(userData.profile.fechaRegistro).toLocaleDateString()
+                                                    : 'N/A'}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
 
