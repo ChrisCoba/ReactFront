@@ -10,6 +10,7 @@ const PACKAGE_FIELDS = gql`
     precio
     duracion
     tipoActividad
+    imagen
     activo
   }
 `;

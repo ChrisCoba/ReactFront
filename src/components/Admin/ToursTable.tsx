@@ -13,6 +13,7 @@ interface Tour {
     pais?: string;
     tipoActividad?: string;
     activo?: boolean;
+    imagen?: string; // URL de imagen desde GraphQL
 }
 
 const PAGE_SIZE = 15;

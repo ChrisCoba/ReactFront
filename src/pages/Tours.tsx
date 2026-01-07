@@ -28,7 +28,10 @@ const Tours: React.FC = () => {
 
     useEffect(() => {
         if (data && data.packages) {
-            const mappedTours: Tour[] = data.packages.map((pkg: any) => ({
+            // Filter only active tours (activo !== false)
+            const activePackages = data.packages.filter((pkg: any) => pkg.activo !== false);
+
+            const mappedTours: Tour[] = activePackages.map((pkg: any) => ({
                 IdPaquete: pkg.id,
                 Nombre: pkg.nombre,
                 Ciudad: pkg.ciudad,
@@ -36,7 +39,7 @@ const Tours: React.FC = () => {
                 Descripcion: pkg.descripcion,
                 PrecioActual: pkg.precio,
                 Duracion: pkg.duracion,
-                ImagenUrl: pkg.imagen || 'asset',
+                ImagenUrl: pkg.imagen || 'https://via.placeholder.com/400x300?text=Tour',
                 FechaInicio: pkg.fechaInicio,
                 TipoActividad: pkg.tipoActividad,
                 CuposDisponibles: pkg.cuposDisponibles,
