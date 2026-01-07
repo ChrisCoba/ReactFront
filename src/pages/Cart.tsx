@@ -3,6 +3,7 @@ import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
+import { ReservasService } from '../services/ReservasService';
 
 const Cart: React.FC = () => {
     const { cart, removeFromCart, totals, clearCart } = useCart();
@@ -10,17 +11,47 @@ const Cart: React.FC = () => {
     const { showWarning, showSuccess } = useToast();
     const navigate = useNavigate();
 
-    const handleCheckout = () => {
+    const handleCheckout = async () => {
         if (!isAuthenticated) {
             showWarning('Debes iniciar sesión para proceder al pago.');
             navigate('/login');
             return;
         }
 
-        // In a real app, this would navigate to payment page
-        showSuccess('¡Pago procesado con éxito! (Simulación)');
-        clearCart();
-        navigate('/');
+        const account = window.prompt("Ingrese su Número de Cuenta para el débito:", "1234567890");
+        if (!account) return;
+
+        try {
+            showSuccess('Procesando reservas...');
+
+            // Iterate and process
+            for (const item of cart) {
+                const holdData = {
+                    IdPaquete: item.tourId, // Corrected property
+                    BookingUserId: '0',
+                    FechaInicio: item.date,
+                    Personas: (item.adults || 1) + (item.children || 0),
+                    DuracionHoldSegundos: 600
+                };
+
+                // Create Hold
+                const holdResponse = await ReservasService.hold(holdData);
+                if (!holdResponse.Exito || !holdResponse.HoldId) {
+                    throw new Error(`Error reservando ${item.name}: ${holdResponse.Mensaje}`);
+                }
+
+                // Pay
+                await ReservasService.pagarReserva(holdResponse.HoldId, account);
+            }
+
+            showSuccess('¡Reservas procesadas y pagadas con éxito!');
+            clearCart();
+            // Optional: navigate to profile
+            navigate('/profile');
+        } catch (error: any) {
+            console.error(error);
+            showWarning(`Error en el proceso: ${error.message}`);
+        }
     };
 
     if (cart.length === 0) {

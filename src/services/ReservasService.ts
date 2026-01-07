@@ -66,5 +66,23 @@ export const ReservasService = {
             console.error('Cancel reservation error:', error);
             throw new Error(error.response?.data?.message || 'Failed to cancel reservation');
         }
-    },
+    /**
+     * Pay for a reservation (Hold -> Pay -> Confirm)
+     */
+    async pagarReserva(reservationId: string, cuentaOrigen: string): Promise < any > {
+            try {
+                // Note: Calling Admin Gateway for proper orchestration
+                // If reservationId is int in backend, frontend string must be parsed?
+                // "reservationId" input implies string from Types. Backend expects int.
+                // But we use admin URL.
+                const adminUrl = "https://worldagencyadmin.runasp.net/api/admin";
+                const response = await apiClient.post(`${adminUrl}/reservas/${reservationId}/pagar`, {
+                    CuentaOrigen: parseInt(cuentaOrigen)
+                });
+                return response.data;
+            } catch(error: any) {
+                console.error('Payment error:', error);
+                throw new Error(error.response?.data?.message || 'Failed to process payment');
+            }
+        },
 };
