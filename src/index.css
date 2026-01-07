@@ -1084,3 +1084,22 @@ h6 {
 .header .header-container {
   padding-right: 30px !important;
 }
+
+/* Make header background consistent across all pages (including Home) */
+.header {
+  background-color: rgba(0, 0, 0, 0.85) !important;
+  padding: 10px 0;
+}
+
+/* Fix "Planea Tu Viaje" card text visibility */
+.booking-form .form-title {
+  color: #000 !important;
+}
+
+.booking-form label {
+  color: #333 !important;
+}
+
+.booking-form select {
+  color: #333 !important;
+}

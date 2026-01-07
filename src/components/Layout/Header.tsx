@@ -20,7 +20,7 @@ const Header: React.FC = () => {
     };
 
     return (
-        <header id="header" className={`header d-flex align-items-center fixed-top ${location.pathname !== '/' ? 'header-inner-pages' : ''}`}>
+        <header id="header" className="header d-flex align-items-center fixed-top">
             <div className="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
                 <Link to="/" className="logo d-flex align-items-center me-auto me-xl-0" onClick={closeMobileNav}>
                     <h1 className="sitename">WorldAgency</h1>
