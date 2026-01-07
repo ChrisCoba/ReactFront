@@ -1044,3 +1044,43 @@ h6 {
       padding-right: 60px; /* Less padding needed on mobile as auth buttons hide/move */
   }
 }
+
+/* Center navigation and reduce oval size */
+.header .header-container {
+  margin: 0 auto; /* Center horizontally */
+  max-width: 800px; /* Limit width to make oval smaller */
+  padding: 3px 20px;
+  /* Reset previous padding-right hack if it exists, or override it */
+  padding-right: 20px; 
+}
+
+/* Ensure navbar centers its content */
+.navmenu {
+  justify-content: center;
+  width: 100%;
+}
+
+.navmenu ul {
+  justify-content: center;
+  width: 100%;
+}
+
+/* Adjust Header Styling to Center Oval */
+.header .header-container {
+  max-width: fit-content; /* Only take necessary width */
+  margin: 0 auto; /* Center horizontally */
+  padding: 5px 30px; /* Adjust padding */
+}
+
+/* Ensure Logo and Nav stay inline */
+.header .header-container {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* Override padding-right form previously */
+.header .header-container {
+  padding-right: 30px !important;
+}

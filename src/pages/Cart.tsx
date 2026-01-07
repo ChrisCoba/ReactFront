@@ -1,14 +1,24 @@
 import React from 'react';
 import { useCart } from '../hooks/useCart';
+import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
 
 const Cart: React.FC = () => {
     const { cart, removeFromCart, totals, clearCart } = useCart();
+    const { isAuthenticated } = useAuth();
+    const { showWarning, showSuccess } = useToast();
     const navigate = useNavigate();
 
     const handleCheckout = () => {
+        if (!isAuthenticated) {
+            showWarning('Debes iniciar sesión para proceder al pago.');
+            navigate('/login');
+            return;
+        }
+
         // In a real app, this would navigate to payment page
-        alert('Funcionalidad de pago en desarrollo');
+        showSuccess('¡Pago procesado con éxito! (Simulación)');
         clearCart();
         navigate('/');
     };
