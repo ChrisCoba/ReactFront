@@ -20,7 +20,7 @@ const Header: React.FC = () => {
     };
 
     return (
-        <header id="header" className="header d-flex align-items-center fixed-top">
+        <header id="header" className={`header d-flex align-items-center fixed-top ${location.pathname !== '/' ? 'header-inner-pages' : ''}`}>
             <div className="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
                 <Link to="/" className="logo d-flex align-items-center me-auto me-xl-0" onClick={closeMobileNav}>
                     <h1 className="sitename">WorldAgency</h1>
@@ -65,37 +65,37 @@ const Header: React.FC = () => {
                         )}
                     </ul>
                 </nav>
-
-                {/* Right side buttons - outside navbar */}
-                <div className="header-actions d-flex align-items-center gap-2">
-                    {/* Mobile Toggle */}
-                    <i className={`mobile-nav-toggle d-xl-none bi ${isMobileNavActive ? 'bi-x' : 'bi-list'}`} onClick={toggleMobileNav}></i>
-
-                    {!isAuthenticated ? (
-                        <>
-                            <Link className="btn-auth btn-auth-outline d-none d-md-block" to="/login">
-                                Iniciar Sesión
-                            </Link>
-                            <Link className="btn-auth btn-auth-filled d-none d-md-block" to="/register">
-                                Registrarse
-                            </Link>
-                        </>
-                    ) : (
-                        <a
-                            className="btn-auth btn-auth-filled d-none d-md-block"
-                            href="#"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                logout();
-                            }}
-                        >
-                            Cerrar Sesión
-                        </a>
-                    )}
-                </div>
             </div>
 
-            {/* Floating Cart Button - top right corner */}
+            {/* Right side buttons - fixed to top right */}
+            <div className="header-actions">
+                {/* Mobile Toggle */}
+                <i className={`mobile-nav-toggle d-xl-none bi ${isMobileNavActive ? 'bi-x' : 'bi-list'}`} onClick={toggleMobileNav}></i>
+
+                {!isAuthenticated ? (
+                    <div className="d-flex gap-2">
+                        <Link className="btn-auth btn-auth-outline d-none d-md-block" to="/login">
+                            Iniciar Sesión
+                        </Link>
+                        <Link className="btn-auth btn-auth-filled d-none d-md-block" to="/register">
+                            Registrarse
+                        </Link>
+                    </div>
+                ) : (
+                    <a
+                        className="btn-auth btn-auth-filled d-none d-md-block"
+                        href="#"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            logout();
+                        }}
+                    >
+                        Cerrar Sesión
+                    </a>
+                )}
+            </div>
+
+            {/* Floating Cart Button - top right corner (below auth buttons) */}
             {isAuthenticated && (
                 <Link className="floating-cart-btn" to="/cart" onClick={closeMobileNav}>
                     <i className="bi bi-cart"></i>
