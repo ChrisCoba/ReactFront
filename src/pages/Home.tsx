@@ -48,7 +48,7 @@ const Home: React.FC = () => {
             <section id="travel-hero" className="travel-hero section dark-background">
                 <div className="hero-background">
                     <video autoPlay muted loop>
-                        <source src="/assets/img/travel/video-2.mp4" type="video/mp4" />
+                        <source src="/assets/videos/hero-beach.mp4" type="video/mp4" />
                     </video>
                     <div className="hero-overlay"></div>
                 </div>
@@ -116,30 +116,24 @@ const Home: React.FC = () => {
 
                         <div className="row g-4">
                             <div className="col-lg-4 col-md-6">
-                                <div className="feature-card">
-                                    <div className="feature-icon">
-                                        <i className="bi bi-people-fill"></i>
-                                    </div>
+                                <div className="about-feature-card">
+                                    <i className="bi bi-people-fill display-4 text-primary mb-3"></i>
                                     <h4>Expertos Locales</h4>
                                     <p>Contamos con expertos locales que te ayudarán a planificar tu viaje.</p>
                                 </div>
                             </div>
 
                             <div className="col-lg-4 col-md-6">
-                                <div className="feature-card">
-                                    <div className="feature-icon">
-                                        <i className="bi bi-shield-check"></i>
-                                    </div>
+                                <div className="about-feature-card">
+                                    <i className="bi bi-shield-check display-4 text-primary mb-3"></i>
                                     <h4>Salvo & Seguro</h4>
                                     <p>Aseguramos tus viajes con la mejor cobertura.</p>
                                 </div>
                             </div>
 
                             <div className="col-lg-4 col-md-6">
-                                <div className="feature-card">
-                                    <div className="feature-icon">
-                                        <i className="bi bi-cash"></i>
-                                    </div>
+                                <div className="about-feature-card">
+                                    <i className="bi bi-cash display-4 text-primary mb-3"></i>
                                     <h4>Mejores Precios</h4>
                                     <p>Contamos con los mejores precios para tus viajes.</p>
                                 </div>
