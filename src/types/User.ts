@@ -17,5 +17,5 @@ export interface RegisterData {
   password: string;
   nombre: string;
   apellido: string;
-  claveAdmin?: string;
+  cedula?: string;
 }

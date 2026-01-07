@@ -34,6 +34,22 @@ const Register: React.FC = () => {
         return value.length >= 6 && hasSpecialChar;
     };
 
+    // Validate cedula - only numbers, max 13 chars
+    const validateCedula = (value: string): boolean => {
+        const numbersOnly = /^[0-9]*$/;
+        return numbersOnly.test(value) && value.length <= 13;
+    };
+
+    const handleCedulaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (validateCedula(value)) {
+            setCedula(value);
+            setFieldErrors(prev => ({ ...prev, cedula: '' }));
+        } else {
+            setFieldErrors(prev => ({ ...prev, cedula: 'Solo números, máximo 13 dígitos' }));
+        }
+    };
+
     const handleNombreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         if (validateOnlyLetters(value)) {
@@ -183,10 +199,13 @@ const Register: React.FC = () => {
                                     type="text"
                                     id="cedula"
                                     value={cedula}
-                                    onChange={(e) => setCedula(e.target.value)}
+                                    onChange={handleCedulaChange}
                                     placeholder="Ej: 1234567890"
+                                    className={fieldErrors.cedula ? 'input-error' : ''}
+                                    maxLength={13}
                                     required
                                 />
+                                {fieldErrors.cedula && <span className="field-error">{fieldErrors.cedula}</span>}
                             </div>
 
                             <div className="auth-input-group">

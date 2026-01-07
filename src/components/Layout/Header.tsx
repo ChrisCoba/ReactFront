@@ -40,11 +40,7 @@ const Header: React.FC = () => {
                         <li>
                             <Link to="/tours" className={location.pathname === '/tours' ? 'active' : ''} onClick={closeMobileNav}>Tours</Link>
                         </li>
-                        {!isAuthenticated ? (
-                            <li>
-                                <Link to="/login" className={location.pathname === '/login' ? 'active' : ''} onClick={closeMobileNav}>Iniciar Sesión</Link>
-                            </li>
-                        ) : (
+                        {isAuthenticated && (
                             <li className="dropdown">
                                 <a href="#">
                                     <span>Hola, {user?.Nombre || 'Usuario'}</span>{' '}
@@ -70,22 +66,30 @@ const Header: React.FC = () => {
                     </ul>
                 </nav>
 
-                <div className="d-flex align-items-center gap-3">
-                    <Link className="btn-shopping-cart" to="/cart" onClick={closeMobileNav}>
-                        <i className="bi bi-cart"></i>
-                        {cartCount > 0 && <span className="badge bg-danger">{cartCount}</span>}
-                    </Link>
-
+                {/* Right side buttons - outside navbar */}
+                <div className="header-actions d-flex align-items-center gap-2">
                     {/* Mobile Toggle */}
                     <i className={`mobile-nav-toggle d-xl-none bi ${isMobileNavActive ? 'bi-x' : 'bi-list'}`} onClick={toggleMobileNav}></i>
 
-                    {!isAuthenticated ? (
-                        <Link className="btn-getstarted d-none d-md-block" to="/register">
-                            Registrarse
+                    {isAuthenticated && (
+                        <Link className="btn-shopping-cart" to="/cart" onClick={closeMobileNav}>
+                            <i className="bi bi-cart"></i>
+                            {cartCount > 0 && <span className="badge bg-danger">{cartCount}</span>}
                         </Link>
+                    )}
+
+                    {!isAuthenticated ? (
+                        <>
+                            <Link className="btn-auth btn-auth-outline d-none d-md-block" to="/login">
+                                Iniciar Sesión
+                            </Link>
+                            <Link className="btn-auth btn-auth-filled d-none d-md-block" to="/register">
+                                Registrarse
+                            </Link>
+                        </>
                     ) : (
                         <a
-                            className="btn-getstarted d-none d-md-block"
+                            className="btn-auth btn-auth-filled d-none d-md-block"
                             href="#"
                             onClick={(e) => {
                                 e.preventDefault();
