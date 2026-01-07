@@ -71,13 +71,6 @@ const Header: React.FC = () => {
                     {/* Mobile Toggle */}
                     <i className={`mobile-nav-toggle d-xl-none bi ${isMobileNavActive ? 'bi-x' : 'bi-list'}`} onClick={toggleMobileNav}></i>
 
-                    {isAuthenticated && (
-                        <Link className="btn-shopping-cart" to="/cart" onClick={closeMobileNav}>
-                            <i className="bi bi-cart"></i>
-                            {cartCount > 0 && <span className="badge bg-danger">{cartCount}</span>}
-                        </Link>
-                    )}
-
                     {!isAuthenticated ? (
                         <>
                             <Link className="btn-auth btn-auth-outline d-none d-md-block" to="/login">
@@ -101,6 +94,14 @@ const Header: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* Floating Cart Button - top right corner */}
+            {isAuthenticated && (
+                <Link className="floating-cart-btn" to="/cart" onClick={closeMobileNav}>
+                    <i className="bi bi-cart"></i>
+                    {cartCount > 0 && <span className="badge bg-danger">{cartCount}</span>}
+                </Link>
+            )}
         </header>
     );
 };
