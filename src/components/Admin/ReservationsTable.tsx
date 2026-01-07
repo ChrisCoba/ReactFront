@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_RESERVATIONS_LIST } from '../../graphql/queries';
 import axios from 'axios';
@@ -26,6 +26,8 @@ const PAGE_SIZE = 15;
 
 export const ReservationsTable: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState<string>('all');
 
     const { data, loading, error, refetch } = useQuery(GET_RESERVATIONS_LIST, {
         variables: { limit: 100 },
@@ -33,8 +35,29 @@ export const ReservationsTable: React.FC = () => {
     });
 
     const reservations: Reservation[] = data?.reservations || [];
-    const totalPages = Math.ceil(reservations.length / PAGE_SIZE);
-    const paginatedReservations = reservations.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+    // Filter reservations based on search term and status
+    const filteredReservations = useMemo(() => {
+        return reservations.filter(res => {
+            const clientName = `${res.cliente?.profile?.nombre || ''} ${res.cliente?.profile?.apellido || ''}`.toLowerCase();
+            const matchesSearch =
+                clientName.includes(searchTerm.toLowerCase()) ||
+                res.id.toString().includes(searchTerm) ||
+                res.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                res.cliente?.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                res.package?.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+
+            const matchesStatus = statusFilter === 'all' ||
+                (statusFilter === 'confirmado' && (res.estado === 'Confirmada' || res.estado === 'Confirmado')) ||
+                (statusFilter === 'pendiente' && res.estado === 'Pendiente') ||
+                (statusFilter === 'cancelado' && (res.estado === 'Cancelada' || res.estado === 'Cancelado'));
+
+            return matchesSearch && matchesStatus;
+        });
+    }, [reservations, searchTerm, statusFilter]);
+
+    const totalPages = Math.ceil(filteredReservations.length / PAGE_SIZE);
+    const paginatedReservations = filteredReservations.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
     const handleCancel = async (id: number) => {
         const reason = prompt('Please enter a reason for cancellation:');
@@ -43,6 +66,7 @@ export const ReservationsTable: React.FC = () => {
                 await axios.post(`https://worldagencyadmin.runasp.net/api/admin/reservas/${id}/cancelar`, JSON.stringify(reason), {
                     headers: { 'Content-Type': 'application/json' }
                 });
+                alert('Reservation cancelled successfully');
                 refetch();
             } catch (err) {
                 console.error('Error cancelling reservation:', err);
@@ -51,15 +75,59 @@ export const ReservationsTable: React.FC = () => {
         }
     };
 
+    // Reset to page 1 when search/filter changes
+    const handleSearchChange = (value: string) => {
+        setSearchTerm(value);
+        setCurrentPage(1);
+    };
+
+    const handleStatusFilterChange = (value: string) => {
+        setStatusFilter(value);
+        setCurrentPage(1);
+    };
+
     if (loading) return <div className="text-center p-4"><div className="spinner-border" role="status"></div></div>;
     if (error) return <div className="alert alert-danger">Error loading reservations: {error.message}</div>;
 
     return (
         <div className="card shadow mb-4">
             <div className="card-header py-3">
-                <h6 className="m-0 font-weight-bold text-primary text-uppercase">Reservations Management ({reservations.length} total)</h6>
+                <h6 className="m-0 font-weight-bold text-primary text-uppercase">Reservations Management ({filteredReservations.length} of {reservations.length})</h6>
             </div>
             <div className="card-body">
+                {/* Search and Filter Bar */}
+                <div className="row mb-3">
+                    <div className="col-md-8">
+                        <div className="input-group">
+                            <span className="input-group-text"><i className="bi bi-search"></i></span>
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Search by code, ID, client name, or package..."
+                                value={searchTerm}
+                                onChange={(e) => handleSearchChange(e.target.value)}
+                            />
+                            {searchTerm && (
+                                <button className="btn btn-outline-secondary" onClick={() => handleSearchChange('')}>
+                                    <i className="bi bi-x"></i>
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    <div className="col-md-4">
+                        <select
+                            className="form-select"
+                            value={statusFilter}
+                            onChange={(e) => handleStatusFilterChange(e.target.value)}
+                        >
+                            <option value="all">All Status</option>
+                            <option value="confirmado">Confirmed</option>
+                            <option value="pendiente">Pending</option>
+                            <option value="cancelado">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div className="table-responsive">
                     <table className="table table-bordered table-hover">
                         <thead className="table-light">
@@ -93,8 +161,8 @@ export const ReservationsTable: React.FC = () => {
                                     <td>${res.total.toFixed(2)}</td>
                                     <td>
                                         <span className={`badge ${res.estado === 'Confirmada' || res.estado === 'Confirmado' ? 'bg-success' :
-                                            res.estado === 'Pendiente' ? 'bg-warning text-dark' :
-                                                res.estado === 'Cancelada' || res.estado === 'Cancelado' ? 'bg-danger' : 'bg-secondary'
+                                                res.estado === 'Pendiente' ? 'bg-warning text-dark' :
+                                                    res.estado === 'Cancelada' || res.estado === 'Cancelado' ? 'bg-danger' : 'bg-secondary'
                                             }`}>
                                             {res.estado}
                                         </span>
