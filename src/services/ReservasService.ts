@@ -69,6 +69,34 @@ export const ReservasService = {
     },
 
     /**
+     * Create a pending reservation from a hold
+     */
+    async createReservation(data: {
+        UsuarioId: number;
+        PaqueteId: string;
+        FechaInicio: string;
+        Personas: number;
+        HoldId?: string;
+    }): Promise<{ id: number }> {
+        try {
+            const adminUrl = "https://worldagencyadmin.runasp.net/api/admin";
+            // Map keys if necessary, ensuring Case matches DTO
+            const payload = {
+                UsuarioId: data.UsuarioId,
+                PaqueteId: parseInt(data.PaqueteId), // Backend expects int
+                FechaInicio: data.FechaInicio,
+                Personas: data.Personas,
+                HoldId: data.HoldId
+            };
+            const response = await apiClient.post(`${adminUrl}/reservas`, payload);
+            return response.data;
+        } catch (error: any) {
+            console.error('Create Reservation error:', error);
+            throw new Error(error.response?.data?.message || 'Failed to create reservation');
+        }
+    },
+
+    /**
      * Pay for a reservation (Hold -> Pay -> Confirm)
      */
     async pagarReserva(reservationId: string, cuentaOrigen: string): Promise<any> {

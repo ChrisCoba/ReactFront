@@ -34,15 +34,35 @@ const Cart: React.FC = () => {
                     DuracionHoldSegundos: 600
                 };
 
+
                 // Create Hold
                 const holdResponse = await ReservasService.hold(holdData);
-                // Backend returns the object directly, likely without Exito property if success is standard 201/200
+
+                // Backend returns the object directly
                 if (!holdResponse.HoldId) {
-                    throw new Error(`Error reservando ${item.name}: ${holdResponse.Mensaje || 'No se recibió ID de reserva'}`);
+                    throw new Error(`Error reservando ${item.name}: Respuesta inválida`);
                 }
 
-                // Pay
-                await ReservasService.pagarReserva(holdResponse.HoldId, account);
+                // 2. Create Reservation (Pending) to get an ID for payment
+                // We need a logged in user ID. Assuming context provides email/id?
+                // The backend Gateway expects 'UsuarioId' (int).
+                // Frontend 'user' from localStorage might have it?
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const userId = user.Id || user.id || 0; // Fallback?
+
+                const reservationData = {
+                    UsuarioId: userId,
+                    PaqueteId: item.tourId,
+                    FechaInicio: item.date,
+                    Personas: (item.adults || 1) + (item.children || 0),
+                    HoldId: holdResponse.HoldId
+                };
+
+                const reservationResponse = await ReservasService.createReservation(reservationData);
+                const reservationId = reservationResponse.id;
+
+                // 3. Pay
+                await ReservasService.pagarReserva(reservationId.toString(), account);
             }
 
             showSuccess('¡Reservas procesadas y pagadas con éxito!');
