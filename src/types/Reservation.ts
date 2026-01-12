@@ -13,11 +13,36 @@ export interface Reservation {
 export interface HoldData {
     IdPaquete: string;
     BookingUserId: string;
+    Correo?: string;
     FechaInicio: string;
     Personas: number;
-    DuracionHoldSegundos: number;
+    DuracionHoldSegundos?: number;
+    Turistas?: Tourist[];
 }
 
+export interface PreReservaResponse {
+    holdId: string;
+    preReservaId: string;
+    fechaExpiracion: string;
+    estado: string;
+    mensaje: string;
+}
+
+export interface ConfirmReservaData {
+    preReservaId: string;
+    idPaquete: string;
+    correo: string;
+    turistas?: Tourist[];
+}
+
+export interface ReservaResponse {
+    reservaId: number;
+    codigo?: string;
+    estado: string;
+    uriFactura?: string;
+}
+
+// Legacy interfaces for backwards compatibility
 export interface HoldResponse {
     HoldId: string;
     CuposDisponibles?: number;
@@ -39,3 +64,4 @@ export interface Tourist {
     Identificacion: string;
     TipoIdentificacion: string;
 }
+

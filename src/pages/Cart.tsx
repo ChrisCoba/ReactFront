@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../context/ToastContext';
@@ -7,9 +7,10 @@ import { ReservasService } from '../services/ReservasService';
 
 const Cart: React.FC = () => {
     const { cart, removeFromCart, totals, clearCart } = useCart();
-    const { isAuthenticated } = useAuth();
-    const { showWarning, showSuccess } = useToast();
+    const { isAuthenticated, user } = useAuth();
+    const { showWarning, showSuccess, showError } = useToast();
     const navigate = useNavigate();
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const handleCheckout = async () => {
         if (!isAuthenticated) {
@@ -21,57 +22,62 @@ const Cart: React.FC = () => {
         const account = window.prompt("Ingrese su Número de Cuenta para el débito:", "1234567890");
         if (!account) return;
 
+        setIsProcessing(true);
+
         try {
             showSuccess('Procesando reservas...');
+            const userEmail = user?.Email || 'cliente@agencia.local';
 
-            // Iterate and process
+            // Process each item in cart
             for (const item of cart) {
-                const holdData = {
-                    IdPaquete: item.tourId, // Corrected property
-                    BookingUserId: '0',
+                const personas = (item.adults || 1) + (item.children || 0);
+                const itemTotal = item.price * item.adults + item.price * 0.5 * item.children;
+
+                // Step 1: Create Pre-Reserva (Hold + PreReserva in one API call)
+                showSuccess(`Creando pre-reserva para ${item.name}...`);
+                const preReservaData = {
+                    IdPaquete: item.tourId,
+                    BookingUserId: user?.Id?.toString() || '0',
+                    Correo: userEmail,
                     FechaInicio: item.date,
-                    Personas: (item.adults || 1) + (item.children || 0),
-                    DuracionHoldSegundos: 600
+                    Personas: personas,
+                    DuracionHoldSegundos: 300
                 };
 
+                const preReserva = await ReservasService.createPreReserva(preReservaData);
+                console.log('Pre-reserva creada:', preReserva);
 
-                // Create Hold
-                const holdResponse = await ReservasService.hold(holdData);
+                // Step 2: Process Bank Payment
+                showSuccess(`Procesando pago de $${itemTotal.toFixed(2)}...`);
+                const payment = await ReservasService.processBankPayment(account, itemTotal);
 
-                // Backend returns the object directly
-                if (!holdResponse.HoldId) {
-                    throw new Error(`Error reservando ${item.name}: Respuesta inválida`);
+                if (!payment.success) {
+                    throw new Error(`Error en el pago para ${item.name}`);
                 }
+                console.log('Pago procesado:', payment);
 
-                // 2. Create Reservation (Pending) to get an ID for payment
-                // We need a logged in user ID. Assuming context provides email/id?
-                // The backend Gateway expects 'UsuarioId' (int).
-                // Frontend 'user' from localStorage might have it?
-                const user = JSON.parse(localStorage.getItem('user') || '{}');
-                const userId = user.Id || user.id || 0; // Fallback?
-
-                const reservationData = {
-                    UsuarioId: userId,
-                    PaqueteId: item.tourId,
-                    FechaInicio: item.date,
-                    Personas: (item.adults || 1) + (item.children || 0),
-                    HoldId: holdResponse.HoldId
+                // Step 3: Confirm Reservation (payment_status = 'paid')
+                showSuccess(`Confirmando reserva para ${item.name}...`);
+                const reservaData = {
+                    preReservaId: preReserva.preReservaId,
+                    idPaquete: item.tourId,
+                    correo: userEmail
                 };
 
-                const reservationResponse = await ReservasService.createReservation(reservationData);
-                const reservationId = reservationResponse.id;
+                const reserva = await ReservasService.confirmReserva(reservaData);
+                console.log('Reserva confirmada:', reserva);
 
-                // 3. Pay
-                await ReservasService.pagarReserva(reservationId.toString(), account);
+                showSuccess(`✓ ${item.name} - Reserva #${reserva.codigo || reserva.reservaId} confirmada`);
             }
 
-            showSuccess('¡Reservas procesadas y pagadas con éxito!');
+            showSuccess('¡Todas las reservas procesadas y pagadas con éxito!');
             clearCart();
-            // Optional: navigate to profile
             navigate('/profile');
         } catch (error: any) {
-            console.error(error);
-            showWarning(`Error en el proceso: ${error.message}`);
+            console.error('Checkout error:', error);
+            showError(`Error en el proceso: ${error.message}`);
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -162,8 +168,12 @@ const Cart: React.FC = () => {
                                     <strong>Total:</strong>
                                     <strong>${totals.total}</strong>
                                 </div>
-                                <button className="btn btn-primary w-100 mb-2" onClick={handleCheckout}>
-                                    Proceder al Pago
+                                <button
+                                    className="btn btn-primary w-100 mb-2"
+                                    onClick={handleCheckout}
+                                    disabled={isProcessing}
+                                >
+                                    {isProcessing ? 'Procesando...' : 'Proceder al Pago'}
                                 </button>
                                 <button className="btn btn-outline-secondary w-100" onClick={clearCart}>
                                     Vaciar Carrito

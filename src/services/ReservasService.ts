@@ -1,46 +1,118 @@
 import { apiClient } from './config';
-import type { HoldData, HoldResponse, BookData, Reservation } from '../types/Reservation';
+import type { HoldData, PreReservaResponse, ConfirmReservaData, ReservaResponse, Reservation } from '../types/Reservation';
+
+// V2 API Base URL
+const V2_API_BASE = 'https://worldagencyint.runasp.net/api/v2/paquetes';
 
 export const ReservasService = {
     /**
-     * Create a hold for a tour
+     * Create pre-reserva (Hold + PreReserva in one step)
+     * Calls: POST /api/v2/paquetes/pre-reserva
      */
-    async hold(data: HoldData): Promise<HoldResponse> {
+    async createPreReserva(data: HoldData): Promise<PreReservaResponse> {
         try {
-            const response = await apiClient.post('/hold', data);
-            return response.data;
+            const payload = {
+                idPaquete: data.IdPaquete,
+                bookingUserId: data.BookingUserId,
+                correo: data.Correo || data.BookingUserId,
+                fechaInicio: data.FechaInicio,
+                turistas: data.Turistas || [],
+                duracionHoldSegundos: data.DuracionHoldSegundos || 300
+            };
+
+            const response = await apiClient.post(`${V2_API_BASE}/pre-reserva`, payload);
+            return {
+                holdId: response.data.id_hold || response.data.holdId,
+                preReservaId: response.data.pre_reserva_id || response.data.preReservaId,
+                fechaExpiracion: response.data.fechaExpiracion,
+                estado: response.data.estado || 'Pendiente',
+                mensaje: response.data.mensaje || 'Pre-reserva creada'
+            };
         } catch (error: any) {
-            console.error('Hold error:', error);
-            throw new Error(error.response?.data?.message || 'Failed to create hold');
+            console.error('Pre-Reserva error:', error);
+            throw new Error(error.response?.data?.detalle || error.response?.data?.message || 'Failed to create pre-reserva');
         }
     },
 
     /**
-     * Book/confirm a reservation
+     * Confirm reservation after payment
+     * Calls: POST /api/v2/paquetes/reserva
      */
-    async book(data: BookData): Promise<Reservation> {
+    async confirmReserva(data: ConfirmReservaData): Promise<ReservaResponse> {
         try {
-            const response = await apiClient.post('/booking', data);
-            return response.data;
+            const payload = {
+                preReservaId: data.preReservaId,
+                idPaquete: data.idPaquete,
+                correo: data.correo,
+                paymentStatus: 'paid',
+                turistas: data.turistas || []
+            };
+
+            const response = await apiClient.post(`${V2_API_BASE}/reserva`, payload);
+            return {
+                reservaId: response.data.id_reserva || response.data.reservaId,
+                codigo: response.data.codigo,
+                estado: response.data.estado || 'Confirmada',
+                uriFactura: response.data.uri_factura
+            };
         } catch (error: any) {
-            console.error('Booking error:', error);
-            throw new Error(error.response?.data?.message || 'Failed to create booking');
+            console.error('Confirm Reserva error:', error);
+            throw new Error(error.response?.data?.detalle || error.response?.data?.message || 'Failed to confirm reservation');
         }
     },
 
     /**
-     * Get availability for a tour
+     * Create invoice for a reservation
+     * Calls: POST /api/v2/paquetes/invoices
      */
-    async checkAvailability(tourId: string, date: string): Promise<number> {
+    async createInvoice(idReserva: string, correo: string, nombre: string, valor: number): Promise<any> {
         try {
-            const response = await apiClient.get('/availability', {
-                params: { tourId, date },
-            });
-            return response.data.cuposDisponibles || 0;
+            const payload = {
+                idReserva,
+                correo,
+                nombre,
+                valor
+            };
+
+            const response = await apiClient.post(`${V2_API_BASE}/invoices`, payload);
+            return response.data;
         } catch (error: any) {
-            console.error('Availability check error:', error);
-            throw new Error(error.response?.data?.message || 'Failed to check availability');
+            console.error('Invoice error:', error);
+            throw new Error(error.response?.data?.detalle || 'Failed to create invoice');
         }
+    },
+
+    /**
+     * Process bank transfer/payment
+     * Uses the configured Banca service endpoint
+     */
+    async processBankPayment(cuentaOrigen: string, monto: number): Promise<{ success: boolean; transactionId?: string }> {
+        try {
+            // Using the Finanzas/Banca endpoint
+            const bancaUrl = 'https://finanzaswa.runasp.net/api/banca/transferir';
+            const payload = {
+                cuentaOrigen: parseInt(cuentaOrigen),
+                cuentaDestino: 1, // Agency's account
+                monto: monto
+            };
+
+            const response = await apiClient.post(bancaUrl, payload);
+            return {
+                success: response.data.exito || true,
+                transactionId: response.data.idTransaccion || response.data.transactionId
+            };
+        } catch (error: any) {
+            console.error('Bank payment error:', error);
+            throw new Error(error.response?.data?.mensaje || 'Failed to process payment');
+        }
+    },
+
+    // Legacy methods for backwards compatibility
+    /**
+     * @deprecated Use createPreReserva instead
+     */
+    async hold(data: HoldData): Promise<any> {
+        return this.createPreReserva(data);
     },
 
     /**
@@ -61,58 +133,11 @@ export const ReservasService = {
      */
     async cancelReservation(reservationId: string): Promise<void> {
         try {
-            await apiClient.delete(`/reservas/${reservationId}`);
+            await apiClient.post(`${V2_API_BASE}/cancelar`, { id_reserva: reservationId });
         } catch (error: any) {
             console.error('Cancel reservation error:', error);
             throw new Error(error.response?.data?.message || 'Failed to cancel reservation');
         }
-    },
-
-    /**
-     * Create a pending reservation from a hold
-     */
-    async createReservation(data: {
-        UsuarioId: number;
-        PaqueteId: string;
-        FechaInicio: string;
-        Personas: number;
-        HoldId?: string;
-    }): Promise<{ id: number }> {
-        try {
-            const adminUrl = "https://worldagencyadmin.runasp.net/api/admin";
-            // Map keys if necessary, ensuring Case matches DTO
-            const payload = {
-                UsuarioId: data.UsuarioId,
-                PaqueteId: parseInt(data.PaqueteId), // Backend expects int
-                FechaInicio: data.FechaInicio,
-                Personas: data.Personas,
-                HoldId: data.HoldId
-            };
-            const response = await apiClient.post(`${adminUrl}/reservas`, payload);
-            return response.data;
-        } catch (error: any) {
-            console.error('Create Reservation error:', error);
-            throw new Error(error.response?.data?.message || 'Failed to create reservation');
-        }
-    },
-
-    /**
-     * Pay for a reservation (Hold -> Pay -> Confirm)
-     */
-    async pagarReserva(reservationId: string, cuentaOrigen: string): Promise<any> {
-        try {
-            // Note: Calling Admin Gateway for proper orchestration
-            // If reservationId is int in backend, frontend string must be parsed?
-            // "reservationId" input implies string from Types. Backend expects int.
-            // But we use admin URL.
-            const adminUrl = "https://worldagencyadmin.runasp.net/api/admin";
-            const response = await apiClient.post(`${adminUrl}/reservas/${reservationId}/pagar`, {
-                CuentaOrigen: parseInt(cuentaOrigen)
-            });
-            return response.data;
-        } catch (error: any) {
-            console.error('Payment error:', error);
-            throw new Error(error.response?.data?.message || 'Failed to process payment');
-        }
-    },
+    }
 };
+
