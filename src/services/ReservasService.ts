@@ -83,27 +83,26 @@ export const ReservasService = {
     },
 
     /**
-     * Process bank transfer/payment
-     * Uses the configured Banca service endpoint
+     * Process bank transfer/payment through Gateway (CORS-safe)
+     * Uses the Gateway's /pago endpoint which proxies to Finanzas
      */
     async processBankPayment(cuentaOrigen: string, monto: number): Promise<{ success: boolean; transactionId?: string }> {
         try {
-            // Using the Finanzas/Banca endpoint
-            const bancaUrl = 'https://finanzaswa.runasp.net/api/banca/transferir';
+            // Using Gateway /pago endpoint (not direct Finanzas call to avoid CORS)
             const payload = {
                 cuentaOrigen: parseInt(cuentaOrigen),
                 cuentaDestino: 1, // Agency's account
                 monto: monto
             };
 
-            const response = await apiClient.post(bancaUrl, payload);
+            const response = await apiClient.post(`${V2_API_BASE}/pago`, payload);
             return {
                 success: response.data.exito || true,
-                transactionId: response.data.idTransaccion || response.data.transactionId
+                transactionId: response.data.transactionId
             };
         } catch (error: any) {
             console.error('Bank payment error:', error);
-            throw new Error(error.response?.data?.mensaje || 'Failed to process payment');
+            throw new Error(error.response?.data?.detalle || error.response?.data?.mensaje || 'Failed to process payment');
         }
     },
 
