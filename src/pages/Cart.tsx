@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { useMutation } from '@apollo/client';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
-import { ReservasService } from '../services/ReservasService';
+import { CREATE_RESERVATION, PAY_RESERVATION } from '../graphql/mutations';
 
 const Cart: React.FC = () => {
     const { cart, removeFromCart, totals, clearCart } = useCart();
@@ -11,6 +12,10 @@ const Cart: React.FC = () => {
     const { showWarning, showSuccess, showError } = useToast();
     const navigate = useNavigate();
     const [isProcessing, setIsProcessing] = useState(false);
+
+    // GraphQL mutations
+    const [createReservation] = useMutation(CREATE_RESERVATION);
+    const [payReservation] = useMutation(PAY_RESERVATION);
 
     const handleCheckout = async () => {
         if (!isAuthenticated || !user) {
@@ -31,27 +36,43 @@ const Cart: React.FC = () => {
             for (const item of cart) {
                 const personas = (item.adults || 1) + (item.children || 0);
 
-                // Step 1: Create Reservation (pending state)
+                // Step 1: Create Reservation (pending state) via GraphQL
                 showSuccess(`Creando reserva para ${item.name}...`);
-                const reservationData = {
-                    UsuarioId: user.Id || 0,
-                    PaqueteId: parseInt(item.tourId),
-                    FechaInicio: item.date,
-                    Personas: personas
-                };
+                const { data: createData } = await createReservation({
+                    variables: {
+                        input: {
+                            usuarioId: user.Id || 0,
+                            paqueteId: parseInt(item.tourId),
+                            fechaInicio: item.date,
+                            personas: personas
+                        }
+                    }
+                });
 
-                const reservation = await ReservasService.createReservation(reservationData);
-                console.log('Reserva creada (pendiente):', reservation);
+                if (!createData?.createReservation?.success) {
+                    throw new Error(createData?.createReservation?.message || 'Error al crear reserva');
+                }
 
-                // Step 2: Pay and confirm reservation
+                const reservationId = createData.createReservation.reservationId;
+                console.log('Reserva creada (pendiente):', reservationId);
+
+                // Step 2: Pay and confirm reservation via GraphQL
                 showSuccess(`Procesando pago para ${item.name}...`);
-                const paymentResult = await ReservasService.payReservation(
-                    reservation.id,
-                    parseInt(account)
-                );
-                console.log('Pago procesado:', paymentResult);
+                const { data: payData } = await payReservation({
+                    variables: {
+                        input: {
+                            reservationId: reservationId,
+                            cuentaOrigen: parseInt(account)
+                        }
+                    }
+                });
 
-                showSuccess(`✓ ${item.name} - Reserva #${reservation.id} confirmada`);
+                if (!payData?.payReservation?.success) {
+                    throw new Error(payData?.payReservation?.message || 'Error al procesar pago');
+                }
+
+                console.log('Pago procesado:', payData.payReservation);
+                showSuccess(`✓ ${item.name} - Reserva #${reservationId} confirmada`);
             }
 
             showSuccess('¡Todas las reservas procesadas y pagadas con éxito!');
