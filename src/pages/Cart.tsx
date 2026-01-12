@@ -13,7 +13,7 @@ const Cart: React.FC = () => {
     const [isProcessing, setIsProcessing] = useState(false);
 
     const handleCheckout = async () => {
-        if (!isAuthenticated) {
+        if (!isAuthenticated || !user) {
             showWarning('Debes iniciar sesión para proceder al pago.');
             navigate('/login');
             return;
@@ -26,48 +26,32 @@ const Cart: React.FC = () => {
 
         try {
             showSuccess('Procesando reservas...');
-            const userEmail = user?.Email || 'cliente@agencia.local';
 
             // Process each item in cart
             for (const item of cart) {
                 const personas = (item.adults || 1) + (item.children || 0);
-                const itemTotal = item.price * item.adults + item.price * 0.5 * item.children;
 
-                // Step 1: Create Pre-Reserva (Hold + PreReserva in one API call)
-                showSuccess(`Creando pre-reserva para ${item.name}...`);
-                const preReservaData = {
-                    IdPaquete: item.tourId,
-                    BookingUserId: user?.Id?.toString() || '0',
-                    Correo: userEmail,
+                // Step 1: Create Reservation (pending state)
+                showSuccess(`Creando reserva para ${item.name}...`);
+                const reservationData = {
+                    UsuarioId: user.Id || 0,
+                    PaqueteId: parseInt(item.tourId),
                     FechaInicio: item.date,
-                    Personas: personas,
-                    DuracionHoldSegundos: 300
+                    Personas: personas
                 };
 
-                const preReserva = await ReservasService.createPreReserva(preReservaData);
-                console.log('Pre-reserva creada:', preReserva);
+                const reservation = await ReservasService.createReservation(reservationData);
+                console.log('Reserva creada (pendiente):', reservation);
 
-                // Step 2: Process Bank Payment
-                showSuccess(`Procesando pago de $${itemTotal.toFixed(2)}...`);
-                const payment = await ReservasService.processBankPayment(account, itemTotal);
+                // Step 2: Pay and confirm reservation
+                showSuccess(`Procesando pago para ${item.name}...`);
+                const paymentResult = await ReservasService.payReservation(
+                    reservation.id,
+                    parseInt(account)
+                );
+                console.log('Pago procesado:', paymentResult);
 
-                if (!payment.success) {
-                    throw new Error(`Error en el pago para ${item.name}`);
-                }
-                console.log('Pago procesado:', payment);
-
-                // Step 3: Confirm Reservation (payment_status = 'paid')
-                showSuccess(`Confirmando reserva para ${item.name}...`);
-                const reservaData = {
-                    preReservaId: preReserva.preReservaId,
-                    idPaquete: item.tourId,
-                    correo: userEmail
-                };
-
-                const reserva = await ReservasService.confirmReserva(reservaData);
-                console.log('Reserva confirmada:', reserva);
-
-                showSuccess(`✓ ${item.name} - Reserva #${reserva.codigo || reserva.reservaId} confirmada`);
+                showSuccess(`✓ ${item.name} - Reserva #${reservation.id} confirmada`);
             }
 
             showSuccess('¡Todas las reservas procesadas y pagadas con éxito!');
