@@ -58,8 +58,10 @@ export const GET_USER_DASHBOARD = gql`
         id
         codigo
         fechaReserva
+        fechaInicio
         total
         estado
+        facturaId
         package {
           nombre
           ciudad
@@ -121,8 +123,10 @@ export const GET_RESERVATIONS_LIST = gql`
       id
       codigo
       fechaReserva
+      fechaInicio
       total
       estado
+      facturaId
       cliente {
         email
         profile {

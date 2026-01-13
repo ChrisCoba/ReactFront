@@ -9,6 +9,7 @@ interface Reservation {
     fechaReserva: string;
     total: number;
     estado: string;
+    facturaId?: number; // For invoice PDF download
     cliente?: {
         email: string;
         profile?: {
