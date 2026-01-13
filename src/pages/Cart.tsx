@@ -196,19 +196,19 @@ const Cart: React.FC = () => {
                                 <div className="card-body">
                                     <div className="mb-3">
                                         <label htmlFor="nroCuenta" className="form-label">
-                                            <i className="bi bi-bank me-1"></i>Número de Cuenta Bancaria
+                                            <i className="bi bi-bank me-1"></i>ID de Cuenta Bancaria
                                         </label>
                                         <input
                                             type="text"
                                             className="form-control"
                                             id="nroCuenta"
-                                            placeholder="Ej: 1786543210"
+                                            placeholder="Ej: 200"
                                             value={nroCuenta}
                                             onChange={(e) => setNroCuenta(e.target.value)}
                                             disabled={isProcessing}
                                         />
                                         <small className="text-muted">
-                                            Se debitará el monto total de esta cuenta
+                                            Ingresa el ID de tu cuenta bancaria (no el número de cuenta)
                                         </small>
                                     </div>
                                     <div className="alert alert-info py-2 small">
