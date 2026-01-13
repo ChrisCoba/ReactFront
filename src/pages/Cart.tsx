@@ -13,7 +13,6 @@ const Cart: React.FC = () => {
     const [isProcessing, setIsProcessing] = useState(false);
 
     // Payment form state
-    const [nroCliente, setNroCliente] = useState('');
     const [nroCuenta, setNroCuenta] = useState('');
     const [showPaymentForm, setShowPaymentForm] = useState(false);
 
@@ -30,12 +29,11 @@ const Cart: React.FC = () => {
         console.log('🛒 ===== CHECKOUT INICIADO =====');
         console.log('Usuario:', user);
         console.log('Carrito:', cart);
-        console.log('Nro Cliente:', nroCliente);
         console.log('Nro Cuenta:', nroCuenta);
 
         // Validation
-        if (!nroCliente.trim() || !nroCuenta.trim()) {
-            showError('Por favor ingresa tu número de cliente y cuenta.');
+        if (!nroCuenta.trim()) {
+            showError('Por favor ingresa tu número de cuenta bancaria.');
             return;
         }
 
@@ -196,20 +194,6 @@ const Cart: React.FC = () => {
                                     <h5 className="mb-0"><i className="bi bi-credit-card me-2"></i>Datos de Pago</h5>
                                 </div>
                                 <div className="card-body">
-                                    <div className="mb-3">
-                                        <label htmlFor="nroCliente" className="form-label">
-                                            <i className="bi bi-person me-1"></i>Número de Cliente
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="nroCliente"
-                                            placeholder="Ej: 12345"
-                                            value={nroCliente}
-                                            onChange={(e) => setNroCliente(e.target.value)}
-                                            disabled={isProcessing}
-                                        />
-                                    </div>
                                     <div className="mb-3">
                                         <label htmlFor="nroCuenta" className="form-label">
                                             <i className="bi bi-bank me-1"></i>Número de Cuenta Bancaria
