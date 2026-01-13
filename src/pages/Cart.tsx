@@ -41,7 +41,8 @@ const Cart: React.FC = () => {
         setIsProcessing(true);
 
         try {
-            showSuccess('Procesando pagos...');
+            // Process all payments silently (spinner is showing)
+            const results = [];
 
             for (const item of cart) {
                 const preReservaId = parseInt(item.reservationId || '0');
@@ -50,23 +51,24 @@ const Cart: React.FC = () => {
                     throw new Error(`No se encontró la pre-reserva para "${item.name}"`);
                 }
 
-                showSuccess(`Procesando pago para ${item.name}...`);
-
                 const payResponse = await ReservasService.payPreReserva(
                     preReservaId,
                     cuentaOrigen,
                     item.price
                 );
 
-                showSuccess(`✓ ${item.name} - Reserva #${payResponse.reservaId} confirmada`);
+                results.push({ name: item.name, reservaId: payResponse.reservaId });
             }
 
-            showSuccess('¡Todas las reservas procesadas y pagadas con éxito!');
+            // Only show success message after ALL payments complete
+            const resumeMsg = results.map(r => `✓ ${r.name} - Reserva #${r.reservaId}`).join('\n');
+            showSuccess(`¡Pago exitoso!\n\n${resumeMsg}`);
+
             clearCart();
             setShowPaymentForm(false);
             navigate('/profile');
         } catch (error: any) {
-            showError(`Error en el proceso: ${error.message}`);
+            showError(`Error al procesar el pago: ${error.message}`);
         } finally {
             setIsProcessing(false);
         }
