@@ -12,24 +12,38 @@ const Cart: React.FC = () => {
     const navigate = useNavigate();
     const [isProcessing, setIsProcessing] = useState(false);
 
-    const handleCheckout = async () => {
-        console.log('🛒 ===== CHECKOUT INICIADO =====');
-        console.log('Usuario:', user);
-        console.log('Carrito:', cart);
+    // Payment form state
+    const [nroCliente, setNroCliente] = useState('');
+    const [nroCuenta, setNroCuenta] = useState('');
+    const [showPaymentForm, setShowPaymentForm] = useState(false);
 
+    const handleOpenPaymentForm = () => {
         if (!isAuthenticated || !user) {
-            console.log('❌ Usuario no autenticado');
             showWarning('Debes iniciar sesión para proceder al pago.');
             navigate('/login');
             return;
         }
+        setShowPaymentForm(true);
+    };
 
-        const account = window.prompt("Ingrese su Número de Cuenta para el débito:", "1234567890");
-        if (!account) {
-            console.log('❌ Usuario canceló ingreso de cuenta');
+    const handleCheckout = async () => {
+        console.log('🛒 ===== CHECKOUT INICIADO =====');
+        console.log('Usuario:', user);
+        console.log('Carrito:', cart);
+        console.log('Nro Cliente:', nroCliente);
+        console.log('Nro Cuenta:', nroCuenta);
+
+        // Validation
+        if (!nroCliente.trim() || !nroCuenta.trim()) {
+            showError('Por favor ingresa tu número de cliente y cuenta.');
             return;
         }
-        console.log('💳 Cuenta ingresada:', account);
+
+        const cuentaOrigen = parseInt(nroCuenta);
+        if (isNaN(cuentaOrigen)) {
+            showError('Número de cuenta inválido.');
+            return;
+        }
 
         setIsProcessing(true);
 
@@ -37,14 +51,11 @@ const Cart: React.FC = () => {
             showSuccess('Procesando pagos...');
             console.log('🔄 Procesando', cart.length, 'items del carrito');
 
-            // Process each item in cart
             for (const item of cart) {
                 console.log('📦 ===== PROCESANDO ITEM =====');
                 console.log('Item:', item);
                 console.log('Pre-Reserva ID:', item.reservationId);
 
-                // The pre-reserva was already created in Tours.tsx
-                // Now we just need to pay it
                 const preReservaId = parseInt(item.reservationId || '0');
 
                 if (!preReservaId) {
@@ -57,8 +68,8 @@ const Cart: React.FC = () => {
 
                 const payResponse = await ReservasService.payPreReserva(
                     preReservaId,
-                    parseInt(account),
-                    item.price  // Monto del carrito
+                    cuentaOrigen,
+                    item.price
                 );
 
                 console.log('📥 Respuesta de pago:', payResponse);
@@ -69,6 +80,7 @@ const Cart: React.FC = () => {
             console.log('🎉 ===== CHECKOUT COMPLETADO =====');
             showSuccess('¡Todas las reservas procesadas y pagadas con éxito!');
             clearCart();
+            setShowPaymentForm(false);
             navigate('/profile');
         } catch (error: any) {
             console.error('❌ ===== CHECKOUT ERROR =====');
@@ -84,11 +96,12 @@ const Cart: React.FC = () => {
             <section className="cart section">
                 <div className="container">
                     <div className="row">
-                        <div className="col-12 text-center">
-                            <h2>Tu Carrito está Vacío</h2>
-                            <p>¡Explora nuestros tours y agrega algunos a tu carrito!</p>
-                            <a href="/tours" className="btn btn-primary">
-                                Ver Tours
+                        <div className="col-12 text-center py-5">
+                            <i className="bi bi-cart-x" style={{ fontSize: '4rem', color: '#ccc' }}></i>
+                            <h2 className="mt-3">Tu Carrito está Vacío</h2>
+                            <p className="text-muted">¡Explora nuestros tours y agrega algunos a tu carrito!</p>
+                            <a href="/tours" className="btn btn-primary btn-lg mt-3">
+                                <i className="bi bi-compass me-2"></i>Ver Tours
                             </a>
                         </div>
                     </div>
@@ -102,14 +115,14 @@ const Cart: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <h2>Mi Carrito</h2>
+                        <h2><i className="bi bi-cart3 me-2"></i>Mi Carrito</h2>
                     </div>
                 </div>
 
                 <div className="row mt-4">
                     <div className="col-lg-8">
                         {cart.map((item, index) => (
-                            <div key={index} className="card mb-3">
+                            <div key={index} className="card mb-3 shadow-sm">
                                 <div className="card-body">
                                     <div className="row align-items-center">
                                         <div className="col-md-3">
@@ -117,27 +130,32 @@ const Cart: React.FC = () => {
                                                 src={item.image || '/assets/img/travel/tour-1.webp'}
                                                 alt={item.name}
                                                 className="img-fluid rounded"
+                                                style={{ maxHeight: '120px', objectFit: 'cover', width: '100%' }}
                                             />
                                         </div>
                                         <div className="col-md-6">
-                                            <h5>{item.name}</h5>
-                                            <p className="mb-1">
+                                            <h5 className="mb-2">{item.name}</h5>
+                                            <p className="mb-1 text-muted">
+                                                <i className="bi bi-calendar3 me-1"></i>
                                                 <strong>Fecha:</strong> {item.date}
                                             </p>
-                                            <p className="mb-1">
+                                            <p className="mb-1 text-muted">
+                                                <i className="bi bi-people me-1"></i>
                                                 <strong>Personas:</strong> {item.adults} adulto(s), {item.children} niño(s)
                                             </p>
-                                            <p className="mb-1">
+                                            <p className="mb-0 text-muted">
+                                                <i className="bi bi-clock me-1"></i>
                                                 <strong>Duración:</strong> {item.duration} días
                                             </p>
                                         </div>
                                         <div className="col-md-2 text-end">
-                                            <p className="h5">${(item.price * item.adults + item.price * 0.5 * item.children).toFixed(2)}</p>
+                                            <p className="h5 text-primary mb-0">${item.price.toFixed(2)}</p>
                                         </div>
                                         <div className="col-md-1 text-end">
                                             <button
-                                                className="btn btn-danger btn-sm"
+                                                className="btn btn-outline-danger btn-sm"
                                                 onClick={() => removeFromCart(index)}
+                                                title="Eliminar"
                                             >
                                                 <i className="bi bi-trash"></i>
                                             </button>
@@ -149,10 +167,12 @@ const Cart: React.FC = () => {
                     </div>
 
                     <div className="col-lg-4">
-                        <div className="card">
+                        {/* Order Summary Card */}
+                        <div className="card shadow-sm mb-4">
+                            <div className="card-header bg-primary text-white">
+                                <h5 className="mb-0"><i className="bi bi-receipt me-2"></i>Resumen del Pedido</h5>
+                            </div>
                             <div className="card-body">
-                                <h4>Resumen del Pedido</h4>
-                                <hr />
                                 <div className="d-flex justify-content-between mb-2">
                                     <span>Subtotal:</span>
                                     <span>${totals.subtotal}</span>
@@ -163,21 +183,100 @@ const Cart: React.FC = () => {
                                 </div>
                                 <hr />
                                 <div className="d-flex justify-content-between mb-3">
-                                    <strong>Total:</strong>
-                                    <strong>${totals.total}</strong>
+                                    <strong className="h5 mb-0">Total:</strong>
+                                    <strong className="h5 mb-0 text-primary">${totals.total}</strong>
                                 </div>
-                                <button
-                                    className="btn btn-primary w-100 mb-2"
-                                    onClick={handleCheckout}
-                                    disabled={isProcessing}
-                                >
-                                    {isProcessing ? 'Procesando...' : 'Proceder al Pago'}
-                                </button>
-                                <button className="btn btn-outline-secondary w-100" onClick={clearCart}>
-                                    Vaciar Carrito
-                                </button>
                             </div>
                         </div>
+
+                        {/* Payment Form Card */}
+                        {showPaymentForm ? (
+                            <div className="card shadow-sm border-success">
+                                <div className="card-header bg-success text-white">
+                                    <h5 className="mb-0"><i className="bi bi-credit-card me-2"></i>Datos de Pago</h5>
+                                </div>
+                                <div className="card-body">
+                                    <div className="mb-3">
+                                        <label htmlFor="nroCliente" className="form-label">
+                                            <i className="bi bi-person me-1"></i>Número de Cliente
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="nroCliente"
+                                            placeholder="Ej: 12345"
+                                            value={nroCliente}
+                                            onChange={(e) => setNroCliente(e.target.value)}
+                                            disabled={isProcessing}
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="nroCuenta" className="form-label">
+                                            <i className="bi bi-bank me-1"></i>Número de Cuenta Bancaria
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="nroCuenta"
+                                            placeholder="Ej: 1786543210"
+                                            value={nroCuenta}
+                                            onChange={(e) => setNroCuenta(e.target.value)}
+                                            disabled={isProcessing}
+                                        />
+                                        <small className="text-muted">
+                                            Se debitará el monto total de esta cuenta
+                                        </small>
+                                    </div>
+                                    <div className="alert alert-info py-2 small">
+                                        <i className="bi bi-shield-lock me-1"></i>
+                                        Tu pago será procesado de forma segura a través de nuestro banco asociado.
+                                    </div>
+                                    <button
+                                        className="btn btn-success w-100 mb-2"
+                                        onClick={handleCheckout}
+                                        disabled={isProcessing}
+                                    >
+                                        {isProcessing ? (
+                                            <>
+                                                <span className="spinner-border spinner-border-sm me-2"></span>
+                                                Procesando...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="bi bi-lock me-2"></i>
+                                                Confirmar Pago - ${totals.total}
+                                            </>
+                                        )}
+                                    </button>
+                                    <button
+                                        className="btn btn-outline-secondary w-100"
+                                        onClick={() => setShowPaymentForm(false)}
+                                        disabled={isProcessing}
+                                    >
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="card shadow-sm">
+                                <div className="card-body">
+                                    <button
+                                        className="btn btn-primary w-100 btn-lg mb-2"
+                                        onClick={handleOpenPaymentForm}
+                                    >
+                                        <i className="bi bi-credit-card me-2"></i>
+                                        Proceder al Pago
+                                    </button>
+                                    <button
+                                        className="btn btn-outline-danger w-100"
+                                        onClick={clearCart}
+                                    >
+                                        <i className="bi bi-trash me-2"></i>
+                                        Vaciar Carrito
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
