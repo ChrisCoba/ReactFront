@@ -189,7 +189,7 @@ const UserProfile: React.FC = () => {
                                                 <tr>
                                                     <th>Cód</th>
                                                     <th>Tour</th>
-                                                    <th>Fecha</th>
+                                                    <th>Fecha Tour</th>
                                                     <th>Total</th>
                                                     <th>Estado</th>
                                                 </tr>
@@ -199,7 +199,7 @@ const UserProfile: React.FC = () => {
                                                     <tr key={b.codigo}>
                                                         <td><small>{b.codigo}</small></td>
                                                         <td>{b.package?.nombre}</td>
-                                                        <td>{new Date(b.fechaReserva).toLocaleDateString()}</td>
+                                                        <td>{b.fechaInicio ? new Date(b.fechaInicio).toLocaleDateString() : 'N/A'}</td>
                                                         <td>${b.total.toFixed(2)}</td>
                                                         <td>
                                                             <span className={`badge ${b.estado === 'Confirmado' ? 'bg-success' : 'bg-warning'}`}>
