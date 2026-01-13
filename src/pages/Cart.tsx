@@ -52,12 +52,13 @@ const Cart: React.FC = () => {
                     throw new Error(`No se encontró la pre-reserva para "${item.name}"`);
                 }
 
-                console.log('💰 Pagando pre-reserva:', preReservaId);
+                console.log('💰 Pagando pre-reserva:', preReservaId, 'Monto:', item.price);
                 showSuccess(`Procesando pago para ${item.name}...`);
 
                 const payResponse = await ReservasService.payPreReserva(
                     preReservaId,
-                    parseInt(account)
+                    parseInt(account),
+                    item.price  // Monto del carrito
                 );
 
                 console.log('📥 Respuesta de pago:', payResponse);

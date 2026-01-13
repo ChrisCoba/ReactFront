@@ -50,10 +50,10 @@ export const ReservasService = {
      * Pay for a Pre-Reserva and confirm it (creates Reserva + Factura)
      * Calls: POST /api/admin/pre-reserva/{id}/pagar
      */
-    async payPreReserva(preReservaId: number, cuentaOrigen: number): Promise<PagoPreReservaResponse> {
-        console.log('💰 [ReservasService] Pagando pre-reserva:', { preReservaId, cuentaOrigen });
+    async payPreReserva(preReservaId: number, cuentaOrigen: number, monto: number): Promise<PagoPreReservaResponse> {
+        console.log('💰 [ReservasService] Pagando pre-reserva:', { preReservaId, cuentaOrigen, monto });
         try {
-            const payload = { CuentaOrigen: cuentaOrigen };
+            const payload = { CuentaOrigen: cuentaOrigen, Monto: monto };
             const response = await apiClient.post(`${ADMIN_API}/pre-reserva/${preReservaId}/pagar`, payload);
             console.log('✅ [ReservasService] Pago procesado:', response.data);
             return response.data;
