@@ -18,68 +18,102 @@ const Cart: React.FC = () => {
     const [payReservation] = useMutation(PAY_RESERVATION);
 
     const handleCheckout = async () => {
+        console.log('🛒 ===== CHECKOUT INICIADO =====');
+        console.log('Usuario:', user);
+        console.log('Carrito:', cart);
+
         if (!isAuthenticated || !user) {
+            console.log('❌ Usuario no autenticado');
             showWarning('Debes iniciar sesión para proceder al pago.');
             navigate('/login');
             return;
         }
 
         const account = window.prompt("Ingrese su Número de Cuenta para el débito:", "1234567890");
-        if (!account) return;
+        if (!account) {
+            console.log('❌ Usuario canceló ingreso de cuenta');
+            return;
+        }
+        console.log('💳 Cuenta ingresada:', account);
 
         setIsProcessing(true);
 
         try {
             showSuccess('Procesando reservas...');
+            console.log('🔄 Procesando', cart.length, 'items del carrito');
 
             // Process each item in cart
             for (const item of cart) {
                 const personas = (item.adults || 1) + (item.children || 0);
 
+                console.log('📦 ===== PROCESANDO ITEM =====');
+                console.log('Item:', item);
+                console.log('Personas:', personas);
+
                 // Step 1: Create Reservation (pending state) via GraphQL
+                console.log('📝 Paso 1: Creando reserva...');
+                const createInput = {
+                    usuarioId: user.Id || 0,
+                    paqueteId: parseInt(item.tourId),
+                    fechaInicio: item.date,
+                    personas: personas
+                };
+                console.log('📤 GraphQL createReservation input:', createInput);
+
                 showSuccess(`Creando reserva para ${item.name}...`);
-                const { data: createData } = await createReservation({
-                    variables: {
-                        input: {
-                            usuarioId: user.Id || 0,
-                            paqueteId: parseInt(item.tourId),
-                            fechaInicio: item.date,
-                            personas: personas
-                        }
-                    }
+                const { data: createData, errors: createErrors } = await createReservation({
+                    variables: { input: createInput }
                 });
 
+                console.log('📥 GraphQL createReservation response:', createData);
+                if (createErrors) {
+                    console.error('❌ GraphQL errors:', createErrors);
+                }
+
                 if (!createData?.createReservation?.success) {
-                    throw new Error(createData?.createReservation?.message || 'Error al crear reserva');
+                    const errorMsg = createData?.createReservation?.message || 'Error al crear reserva';
+                    console.error('❌ Error creando reserva:', errorMsg);
+                    throw new Error(errorMsg);
                 }
 
                 const reservationId = createData.createReservation.reservationId;
-                console.log('Reserva creada (pendiente):', reservationId);
+                console.log('✅ Reserva creada (pendiente). ID:', reservationId);
 
                 // Step 2: Pay and confirm reservation via GraphQL
+                console.log('💰 Paso 2: Procesando pago...');
+                const payInput = {
+                    reservationId: reservationId,
+                    cuentaOrigen: parseInt(account)
+                };
+                console.log('📤 GraphQL payReservation input:', payInput);
+
                 showSuccess(`Procesando pago para ${item.name}...`);
-                const { data: payData } = await payReservation({
-                    variables: {
-                        input: {
-                            reservationId: reservationId,
-                            cuentaOrigen: parseInt(account)
-                        }
-                    }
+                const { data: payData, errors: payErrors } = await payReservation({
+                    variables: { input: payInput }
                 });
 
-                if (!payData?.payReservation?.success) {
-                    throw new Error(payData?.payReservation?.message || 'Error al procesar pago');
+                console.log('📥 GraphQL payReservation response:', payData);
+                if (payErrors) {
+                    console.error('❌ GraphQL errors:', payErrors);
                 }
 
-                console.log('Pago procesado:', payData.payReservation);
+                if (!payData?.payReservation?.success) {
+                    const errorMsg = payData?.payReservation?.message || 'Error al procesar pago';
+                    console.error('❌ Error procesando pago:', errorMsg);
+                    throw new Error(errorMsg);
+                }
+
+                console.log('✅ Pago procesado:', payData.payReservation);
                 showSuccess(`✓ ${item.name} - Reserva #${reservationId} confirmada`);
             }
 
+            console.log('🎉 ===== CHECKOUT COMPLETADO =====');
             showSuccess('¡Todas las reservas procesadas y pagadas con éxito!');
             clearCart();
             navigate('/profile');
         } catch (error: any) {
-            console.error('Checkout error:', error);
+            console.error('❌ ===== CHECKOUT ERROR =====');
+            console.error('Error completo:', error);
             showError(`Error en el proceso: ${error.message}`);
         } finally {
             setIsProcessing(false);
