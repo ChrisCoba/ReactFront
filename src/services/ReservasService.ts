@@ -35,13 +35,10 @@ export const ReservasService = {
      * Calls: POST /api/admin/pre-reserva
      */
     async createPreReserva(data: PreReservaData): Promise<PreReservaResponse> {
-        console.log('📝 [ReservasService] Creando pre-reserva:', data);
         try {
             const response = await apiClient.post(`${ADMIN_API}/pre-reserva`, data);
-            console.log('✅ [ReservasService] Pre-reserva creada:', response.data);
             return response.data;
         } catch (error: any) {
-            console.error('❌ [ReservasService] Error creando pre-reserva:', error.response?.data || error.message);
             throw new Error(error.response?.data?.detalle || error.response?.data?.error || 'Failed to create pre-reserva');
         }
     },
@@ -51,14 +48,11 @@ export const ReservasService = {
      * Calls: POST /api/admin/pre-reserva/{id}/pagar
      */
     async payPreReserva(preReservaId: number, cuentaOrigen: number, monto: number): Promise<PagoPreReservaResponse> {
-        console.log('💰 [ReservasService] Pagando pre-reserva:', { preReservaId, cuentaOrigen, monto });
         try {
             const payload = { CuentaOrigen: cuentaOrigen, Monto: monto };
             const response = await apiClient.post(`${ADMIN_API}/pre-reserva/${preReservaId}/pagar`, payload);
-            console.log('✅ [ReservasService] Pago procesado:', response.data);
             return response.data;
         } catch (error: any) {
-            console.error('❌ [ReservasService] Error pagando pre-reserva:', error.response?.data || error.message);
             throw new Error(error.response?.data?.detalle || error.response?.data?.error || 'Failed to process payment');
         }
     },

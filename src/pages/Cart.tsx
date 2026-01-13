@@ -26,20 +26,15 @@ const Cart: React.FC = () => {
     };
 
     const handleCheckout = async () => {
-        console.log('🛒 ===== CHECKOUT INICIADO =====');
-        console.log('Usuario:', user);
-        console.log('Carrito:', cart);
-        console.log('Nro Cuenta:', nroCuenta);
-
         // Validation
         if (!nroCuenta.trim()) {
-            showError('Por favor ingresa tu número de cuenta bancaria.');
+            showError('Por favor ingresa tu ID de cuenta bancaria.');
             return;
         }
 
         const cuentaOrigen = parseInt(nroCuenta);
         if (isNaN(cuentaOrigen)) {
-            showError('Número de cuenta inválido.');
+            showError('ID de cuenta inválido.');
             return;
         }
 
@@ -47,21 +42,14 @@ const Cart: React.FC = () => {
 
         try {
             showSuccess('Procesando pagos...');
-            console.log('🔄 Procesando', cart.length, 'items del carrito');
 
             for (const item of cart) {
-                console.log('📦 ===== PROCESANDO ITEM =====');
-                console.log('Item:', item);
-                console.log('Pre-Reserva ID:', item.reservationId);
-
                 const preReservaId = parseInt(item.reservationId || '0');
 
                 if (!preReservaId) {
-                    console.error('❌ No hay ID de pre-reserva para este item');
                     throw new Error(`No se encontró la pre-reserva para "${item.name}"`);
                 }
 
-                console.log('💰 Pagando pre-reserva:', preReservaId, 'Monto:', item.price);
                 showSuccess(`Procesando pago para ${item.name}...`);
 
                 const payResponse = await ReservasService.payPreReserva(
@@ -70,19 +58,14 @@ const Cart: React.FC = () => {
                     item.price
                 );
 
-                console.log('📥 Respuesta de pago:', payResponse);
-                console.log('✅ Pago procesado - Reserva confirmada:', payResponse.reservaId);
                 showSuccess(`✓ ${item.name} - Reserva #${payResponse.reservaId} confirmada`);
             }
 
-            console.log('🎉 ===== CHECKOUT COMPLETADO =====');
             showSuccess('¡Todas las reservas procesadas y pagadas con éxito!');
             clearCart();
             setShowPaymentForm(false);
             navigate('/profile');
         } catch (error: any) {
-            console.error('❌ ===== CHECKOUT ERROR =====');
-            console.error('Error completo:', error);
             showError(`Error en el proceso: ${error.message}`);
         } finally {
             setIsProcessing(false);

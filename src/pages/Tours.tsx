@@ -83,13 +83,7 @@ const Tours: React.FC = () => {
     };
 
     const handleAddToCart = async (tourId: string, adults: number, children: number, date: string) => {
-        console.log('🎫 ===== RESERVAR CLICK =====');
-        console.log('TourId:', tourId);
-        console.log('Adultos:', adults, 'Niños:', children);
-        console.log('Fecha:', date);
-
         if (!isAuthenticated) {
-            console.log('❌ Usuario no autenticado');
             showWarning('Debes iniciar sesión para hacer una reserva.');
             navigate('/login');
             return;
@@ -97,16 +91,12 @@ const Tours: React.FC = () => {
 
         const tour = tours.find((t) => t.IdPaquete === tourId);
         if (!tour) {
-            console.log('❌ Tour no encontrado:', tourId);
             showError('Tour no encontrado.');
             return;
         }
-        console.log('Tour encontrado:', tour);
 
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const totalPersonas = adults + children;
-        console.log('Usuario:', user);
-        console.log('Total personas:', totalPersonas);
 
         try {
             // Create Pre-Reserva (pending, 300s to pay)
@@ -116,10 +106,8 @@ const Tours: React.FC = () => {
                 FechaInicio: date,
                 Personas: totalPersonas,
             };
-            console.log('📤 Enviando PRE-RESERVA request:', preReservaData);
 
             const preReservaResponse = await ReservasService.createPreReserva(preReservaData);
-            console.log('📥 PRE-RESERVA response:', preReservaResponse);
 
             // Add to cart with pre-reserva ID (payment happens in Cart)
             addToCart(
@@ -131,16 +119,12 @@ const Tours: React.FC = () => {
                 children,
                 date,
                 tour.ImagenUrl,
-                preReservaResponse.id.toString() // Pre-reserva ID as holdId for cart
+                preReservaResponse.id.toString()
             );
-            console.log('✅ Agregado al carrito con PreReservaId:', preReservaResponse.id);
 
             showSuccess(`"${tour.Nombre}" agregado al carrito. Tienes 5 minutos para completar el pago.`);
             navigate('/cart');
         } catch (err: any) {
-            console.error('❌ ===== ERROR EN RESERVAR =====');
-            console.error('Error completo:', err);
-            console.error('Error message:', err.message);
             showError(`Error al reservar: ${err.message || 'Por favor intenta de nuevo.'}`);
         }
     };
