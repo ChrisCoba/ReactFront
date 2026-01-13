@@ -159,8 +159,8 @@ export const ReservationsTable: React.FC = () => {
                                     <td>${res.total.toFixed(2)}</td>
                                     <td>
                                         <span className={`badge ${res.estado === 'Confirmada' || res.estado === 'Confirmado' ? 'bg-success' :
-                                                res.estado === 'Pendiente' ? 'bg-warning text-dark' :
-                                                    res.estado === 'Cancelada' || res.estado === 'Cancelado' ? 'bg-danger' : 'bg-secondary'
+                                            res.estado === 'Pendiente' ? 'bg-warning text-dark' :
+                                                res.estado === 'Cancelada' || res.estado === 'Cancelado' ? 'bg-danger' : 'bg-secondary'
                                             }`}>
                                             {res.estado}
                                         </span>
@@ -169,6 +169,23 @@ export const ReservationsTable: React.FC = () => {
                                         {res.estado !== 'Cancelada' && res.estado !== 'Cancelado' && (
                                             <button className="btn btn-sm btn-danger" onClick={() => handleCancel(res.id)} title="Cancelar">
                                                 <i className="bi bi-x-circle"></i>
+                                            </button>
+                                        )}
+                                        {' '}
+                                        {res.facturaId && (
+                                            <button
+                                                className="btn btn-sm btn-outline-primary"
+                                                onClick={async () => {
+                                                    try {
+                                                        const { FacturasService } = await import('../../services/FacturasService');
+                                                        await FacturasService.downloadInvoicePdf(res.facturaId);
+                                                    } catch (error) {
+                                                        alert('Error al descargar factura');
+                                                    }
+                                                }}
+                                                title="Descargar factura PDF"
+                                            >
+                                                <i className="bi bi-file-earmark-pdf"></i>
                                             </button>
                                         )}
                                     </td>

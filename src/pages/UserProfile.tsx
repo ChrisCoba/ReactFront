@@ -192,6 +192,7 @@ const UserProfile: React.FC = () => {
                                                     <th>Fecha Tour</th>
                                                     <th>Total</th>
                                                     <th>Estado</th>
+                                                    <th>Factura</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -205,6 +206,24 @@ const UserProfile: React.FC = () => {
                                                             <span className={`badge ${b.estado === 'Confirmado' ? 'bg-success' : 'bg-warning'}`}>
                                                                 {b.estado}
                                                             </span>
+                                                        </td>
+                                                        <td>
+                                                            {b.facturaId && (
+                                                                <button
+                                                                    className="btn btn-sm btn-outline-primary"
+                                                                    onClick={async () => {
+                                                                        try {
+                                                                            const { FacturasService } = await import('../services/FacturasService');
+                                                                            await FacturasService.downloadInvoicePdf(b.facturaId);
+                                                                        } catch (error) {
+                                                                            showError('Error al descargar factura');
+                                                                        }
+                                                                    }}
+                                                                    title="Descargar factura PDF"
+                                                                >
+                                                                    <i className="bi bi-file-earmark-pdf"></i> PDF
+                                                                </button>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 ))}
