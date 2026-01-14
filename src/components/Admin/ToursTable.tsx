@@ -14,6 +14,7 @@ interface Tour {
     tipoActividad?: string;
     activo?: boolean;
     imagen?: string; // URL de imagen desde GraphQL
+    capacidad?: number; // Disponibilidad/cupo del tour
 }
 
 const PAGE_SIZE = 15;
@@ -137,6 +138,7 @@ export const ToursTable: React.FC = () => {
                                 <th>Ciudad</th>
                                 <th>Precio</th>
                                 <th>Duración</th>
+                                <th>Disponibilidad</th>
                                 <th>Estado</th>
                                 <th>Tipo</th>
                                 <th>Acciones</th>
@@ -150,6 +152,11 @@ export const ToursTable: React.FC = () => {
                                     <td>{tour.ciudad}</td>
                                     <td>${tour.precio}</td>
                                     <td>{tour.duracion} días</td>
+                                    <td>
+                                        <span className={`badge ${(tour.capacidad ?? 0) > 5 ? 'bg-success' : (tour.capacidad ?? 0) > 0 ? 'bg-warning text-dark' : 'bg-danger'}`}>
+                                            {tour.capacidad ?? 'N/A'} cupos
+                                        </span>
+                                    </td>
                                     <td>
                                         <span className={`badge ${tour.activo !== false ? 'bg-success' : 'bg-secondary'}`}>
                                             {tour.activo !== false ? 'Activo' : 'Inactivo'}
@@ -166,7 +173,7 @@ export const ToursTable: React.FC = () => {
                                     </td>
                                 </tr>
                             )) : (
-                                <tr><td colSpan={8} className="text-center p-3">No se encontraron tours</td></tr>
+                                <tr><td colSpan={9} className="text-center p-3">No se encontraron tours</td></tr>
                             )}
                         </tbody>
                     </table>

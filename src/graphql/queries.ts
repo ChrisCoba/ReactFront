@@ -12,6 +12,7 @@ const PACKAGE_FIELDS = gql`
     tipoActividad
     imagen
     activo
+    capacidad
   }
 `;
 
