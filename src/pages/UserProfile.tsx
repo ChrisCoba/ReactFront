@@ -4,7 +4,6 @@ import { GET_USER_DASHBOARD, GET_RESERVATIONS_LIST } from '../graphql/queries';
 import { UPDATE_USER_PROFILE } from '../graphql/mutations';
 import axios from 'axios';
 import { useAuth } from '../hooks/useAuth';
-import { AuthService } from '../services/AuthService';
 import { useToast } from '../context/ToastContext';
 import ReservationDetailsModal from '../components/ReservationDetailsModal';
 
@@ -16,7 +15,7 @@ interface UserProfile {
 }
 
 const UserProfile: React.FC = () => {
-    const { user, login, logout } = useAuth();
+    const { user } = useAuth();
     const { showToast, showError } = useToast();
     const [isEditing, setIsEditing] = useState(false);
 
@@ -30,7 +29,6 @@ const UserProfile: React.FC = () => {
     });
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [searchTerm, setSearchTerm] = useState('');
     const PAGE_SIZE = 10;
 
     const [selectedReservationId, setSelectedReservationId] = useState<number | null>(null);
@@ -38,8 +36,8 @@ const UserProfile: React.FC = () => {
 
     // Get user dashboard data
     const { data: userDataResponse, loading: userLoading, refetch: refetchUser } = useQuery(GET_USER_DASHBOARD, {
-        variables: { userId: user?.id ? parseInt(user.id) : 0 },
-        skip: !user?.id,
+        variables: { userId: user?.Id ? Number(user.Id) : 0 },
+        skip: !user?.Id,
         fetchPolicy: 'network-only'
     });
 
@@ -52,7 +50,7 @@ const UserProfile: React.FC = () => {
     });
 
     useEffect(() => {
-        if (user?.email || user?.Email) {
+        if (user?.Email) {
             refetchUser();
         }
     }, [user, refetchUser]);
@@ -91,7 +89,7 @@ const UserProfile: React.FC = () => {
     };
 
     const allReservations = reservationsData?.reservations || [];
-    const userEmail = user?.email || user?.Email || '';
+    const userEmail = user?.Email || '';
 
     // Filter bookings
     const filteredBookings = useMemo(() => {
@@ -134,12 +132,6 @@ const UserProfile: React.FC = () => {
                             </div>
                             <h4>{userData?.profile?.nombre} {userData?.profile?.apellido}</h4>
                             <p className="text-muted">{user?.Email || user?.email}</p>
-                            <div className="d-grid gap-2 mt-4">
-                                <div className="p-3 bg-light rounded">
-                                    <small className="text-muted d-block">Total Gastado</small>
-                                    <h5 className="mb-0 text-primary">${userData?.totalSpent?.toFixed(2) || '0.00'}</h5>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -250,9 +242,9 @@ const UserProfile: React.FC = () => {
                                                 <td>${booking.total.toFixed(2)}</td>
                                                 <td>
                                                     <span className={`badge ${booking.estado === 'Confirmada' || booking.estado === 'Confirmado' ? 'bg-success' :
-                                                            booking.estado === 'Completada' || booking.estado === 'Completado' ? 'bg-info' :
-                                                                booking.estado === 'Pendiente' ? 'bg-warning text-dark' :
-                                                                    booking.estado === 'Cancelada' || booking.estado === 'Cancelado' ? 'bg-danger' : 'bg-secondary'
+                                                        booking.estado === 'Completada' || booking.estado === 'Completado' ? 'bg-info' :
+                                                            booking.estado === 'Pendiente' ? 'bg-warning text-dark' :
+                                                                booking.estado === 'Cancelada' || booking.estado === 'Cancelado' ? 'bg-danger' : 'bg-secondary'
                                                         }`}>
                                                         {booking.estado}
                                                     </span>
