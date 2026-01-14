@@ -9,7 +9,17 @@ export const AuthService = {
     async login(credentials: LoginCredentials, rememberMe: boolean = false): Promise<User> {
         try {
             const response = await gatewayClient.post('/login', credentials);
-            const user = response.data;
+            const apiData = response.data;
+
+            // Normalize field names: API returns camelCase, frontend expects PascalCase
+            const user: User = {
+                Id: apiData.id || apiData.Id,
+                Email: apiData.email || apiData.Email,
+                Nombre: apiData.nombre || apiData.Nombre,
+                Apellido: apiData.apellido || apiData.Apellido,
+                EsAdmin: apiData.esAdmin ?? apiData.EsAdmin ?? false,
+                Telefono: apiData.telefono || apiData.Telefono
+            };
 
             // Store in sessionStorage by default, localStorage only if "Remember me" is checked
             const storage = rememberMe ? localStorage : sessionStorage;
