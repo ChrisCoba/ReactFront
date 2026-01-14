@@ -1,4 +1,4 @@
-import { apiClient } from './config';
+import { gatewayClient } from './config';
 import type { User, LoginCredentials, RegisterData } from '../types/User';
 
 // Inactivity timeout: 2 minutes
@@ -8,7 +8,7 @@ let inactivityTimer: number | null = null;
 export const AuthService = {
     async login(credentials: LoginCredentials, rememberMe: boolean = false): Promise<User> {
         try {
-            const response = await apiClient.post('/login', credentials);
+            const response = await gatewayClient.post('/login', credentials);
             const user = response.data;
 
             // Store in sessionStorage by default, localStorage only if "Remember me" is checked
@@ -35,7 +35,7 @@ export const AuthService = {
                 Apellido: data.apellido,
             };
 
-            const response = await apiClient.post('/register', payload);
+            const response = await gatewayClient.post('/register', payload);
             return response.data;
         } catch (error: any) {
             console.error('Registration error:', error);
@@ -93,7 +93,7 @@ export const AuthService = {
                 Password: data.password
             };
 
-            const response = await apiClient.put(`/usuarios/${id}`, payload);
+            const response = await gatewayClient.put(`/usuarios/${id}`, payload);
             const updatedUser = response.data;
 
             // Update storage
