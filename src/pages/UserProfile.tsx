@@ -29,7 +29,8 @@ const UserProfile: React.FC = () => {
     // Use GraphQL to fetch enriched profile data (total spent, bookings)
     const { data, loading, error, refetch } = useQuery(GET_USER_DASHBOARD, {
         variables: { userId: user?.Id || 0 },
-        skip: !user?.Id
+        skip: !user?.Id,
+        fetchPolicy: 'network-only' // Always fetch fresh data
     });
 
     useEffect(() => {
@@ -245,13 +246,23 @@ const UserProfile: React.FC = () => {
                                                             >
                                                                 <i className="bi bi-eye"></i>
                                                             </button>
-                                                            {/* Factura button (document icon) - placeholder */}
+                                                            {/* Factura button (document icon) */}
                                                             <button
-                                                                className="btn btn-sm btn-outline-primary"
-                                                                onClick={() => {
-                                                                    showError('Función de factura próximamente');
+                                                                className={`btn btn-sm ${b.facturaId ? 'btn-outline-primary' : 'btn-outline-secondary'}`}
+                                                                onClick={async () => {
+                                                                    if (b.facturaId) {
+                                                                        try {
+                                                                            const { FacturasService } = await import('../services/FacturasService');
+                                                                            await FacturasService.downloadInvoicePdf(b.facturaId);
+                                                                        } catch (error) {
+                                                                            showError('Error al descargar factura');
+                                                                        }
+                                                                    } else {
+                                                                        showError('No hay factura disponible para esta reserva');
+                                                                    }
                                                                 }}
-                                                                title="Ver Factura"
+                                                                title={b.facturaId ? 'Descargar Factura PDF' : 'Sin factura'}
+                                                                disabled={!b.facturaId}
                                                             >
                                                                 <i className="bi bi-file-earmark-text"></i>
                                                             </button>

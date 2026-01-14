@@ -168,13 +168,23 @@ export const ReservationsTable: React.FC = () => {
                                         >
                                             <i className="bi bi-eye"></i>
                                         </button>
-                                        {/* Factura button (document icon) - placeholder */}
+                                        {/* Factura button (document icon) */}
                                         <button
-                                            className="btn btn-sm btn-outline-primary me-1"
-                                            onClick={() => {
-                                                alert('Función de factura próximamente');
+                                            className={`btn btn-sm me-1 ${res.facturaId ? 'btn-outline-primary' : 'btn-outline-secondary'}`}
+                                            onClick={async () => {
+                                                if (res.facturaId) {
+                                                    try {
+                                                        const { FacturasService } = await import('../../services/FacturasService');
+                                                        await FacturasService.downloadInvoicePdf(res.facturaId);
+                                                    } catch (error) {
+                                                        alert('Error al descargar factura');
+                                                    }
+                                                } else {
+                                                    alert('No hay factura disponible para esta reserva');
+                                                }
                                             }}
-                                            title="Ver Factura"
+                                            title={res.facturaId ? 'Descargar Factura PDF' : 'Sin factura'}
+                                            disabled={!res.facturaId}
                                         >
                                             <i className="bi bi-file-earmark-text"></i>
                                         </button>
