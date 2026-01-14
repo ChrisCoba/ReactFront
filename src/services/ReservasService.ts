@@ -83,5 +83,19 @@ export const ReservasService = {
             console.error('Cancel reservation error:', error);
             throw new Error(error.response?.data?.message || 'Failed to cancel reservation');
         }
+    },
+
+    /**
+     * Complete a confirmed reservation (changes estado from Confirmada to Completada)
+     * Calls: POST /api/admin/reservas/{id}/completar
+     */
+    async completarReservation(reservationId: number): Promise<{ message: string; reservaId: number; codigo: string; estado: string }> {
+        try {
+            const response = await apiClient.post(`${ADMIN_API}/reservas/${reservationId}/completar`);
+            return response.data;
+        } catch (error: any) {
+            console.error('Complete reservation error:', error);
+            throw new Error(error.response?.data?.error || error.response?.data?.message || 'No se pudo completar la reserva');
+        }
     }
 };

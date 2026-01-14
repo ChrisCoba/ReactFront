@@ -3,6 +3,7 @@ import { useQuery } from '@apollo/client';
 import { GET_USER_DASHBOARD } from '../graphql/queries';
 import { useAuth } from '../hooks/useAuth';
 import { AuthService } from '../services/AuthService';
+import { ReservasService } from '../services/ReservasService';
 import { useToast } from '../context/ToastContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -223,13 +224,35 @@ const UserProfile: React.FC = () => {
                                                         <td><small>{b.codigo}</small></td>
                                                         <td>{b.package?.nombre}</td>
                                                         <td>{b.fechaInicio ? new Date(b.fechaInicio).toLocaleDateString() : 'N/A'}</td>
-                                                        <td>${b.total.toFixed(2)}</td>
+                                                        <td>${b.total?.toFixed(2) || '0.00'}</td>
                                                         <td>
-                                                            <span className={`badge ${b.estado === 'Confirmado' ? 'bg-success' : 'bg-warning'}`}>
+                                                            <span className={`badge ${b.estado === 'Confirmada' || b.estado === 'Confirmado' ? 'bg-success' :
+                                                                    b.estado === 'Completada' || b.estado === 'Completado' ? 'bg-info' :
+                                                                        b.estado?.toLowerCase().includes('cancel') ? 'bg-danger' : 'bg-warning'
+                                                                }`}>
                                                                 {b.estado}
                                                             </span>
                                                         </td>
                                                         <td>
+                                                            {/* Completar button - only for Confirmada state */}
+                                                            {(b.estado === 'Confirmada' || b.estado === 'Confirmado') && (
+                                                                <button
+                                                                    className="btn btn-sm btn-success me-1"
+                                                                    onClick={async () => {
+                                                                        try {
+                                                                            await ReservasService.completarReservation(b.id);
+                                                                            showSuccess('Reserva completada exitosamente');
+                                                                            refetch();
+                                                                        } catch (error: any) {
+                                                                            showError(error.message || 'Error al completar reserva');
+                                                                        }
+                                                                    }}
+                                                                    title="Completar reserva"
+                                                                >
+                                                                    <i className="bi bi-check-circle"></i> Completar
+                                                                </button>
+                                                            )}
+                                                            {/* Invoice download button */}
                                                             {b.facturaId && (
                                                                 <button
                                                                     className="btn btn-sm btn-outline-primary"
