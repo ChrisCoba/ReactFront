@@ -56,7 +56,7 @@ export const ReservationsTable: React.FC = () => {
                 (statusFilter === 'cancelado' && (res.estado === 'Cancelada' || res.estado === 'Cancelado'));
 
             return matchesSearch && matchesStatus;
-        });
+        }).sort((a, b) => b.id - a.id); // Sort by ID descending (newest first)
     }, [reservations, searchTerm, statusFilter]);
 
     const totalPages = Math.ceil(filteredReservations.length / PAGE_SIZE);
@@ -149,9 +149,9 @@ export const ReservationsTable: React.FC = () => {
                                     <td>${res.total.toFixed(2)}</td>
                                     <td>
                                         <span className={`badge ${res.estado === 'Confirmada' || res.estado === 'Confirmado' ? 'bg-success' :
-                                                res.estado === 'Completada' || res.estado === 'Completado' ? 'bg-info' :
-                                                    res.estado === 'Pendiente' ? 'bg-warning text-dark' :
-                                                        res.estado === 'Cancelada' || res.estado === 'Cancelado' ? 'bg-danger' : 'bg-secondary'
+                                            res.estado === 'Completada' || res.estado === 'Completado' ? 'bg-info' :
+                                                res.estado === 'Pendiente' ? 'bg-warning text-dark' :
+                                                    res.estado === 'Cancelada' || res.estado === 'Cancelado' ? 'bg-danger' : 'bg-secondary'
                                             }`}>
                                             {res.estado}
                                         </span>

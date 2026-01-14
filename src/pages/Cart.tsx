@@ -89,7 +89,8 @@ const Cart: React.FC = () => {
         navigate('/profile');
     };
 
-    if (cart.length === 0) {
+    // Show empty cart view, BUT also render CompletionModal if it's open
+    if (cart.length === 0 && !showCompletionModal) {
         return (
             <section className="cart section">
                 <div className="container">
@@ -105,6 +106,19 @@ const Cart: React.FC = () => {
                     </div>
                 </div>
             </section>
+        );
+    }
+
+    // If cart is empty but modal is open, show the modal
+    if (cart.length === 0 && showCompletionModal) {
+        return (
+            <CompletionModal
+                isOpen={showCompletionModal}
+                onClose={() => setShowCompletionModal(false)}
+                reservations={confirmedReservations}
+                onComplete={handleCompletionComplete}
+                onCancel={handleCompletionCancel}
+            />
         );
     }
 

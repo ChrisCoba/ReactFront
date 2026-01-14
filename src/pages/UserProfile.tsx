@@ -56,7 +56,7 @@ const UserProfile: React.FC = () => {
             b.package?.nombre?.toLowerCase().includes(searchTerm.toLowerCase());
 
         return matchesStatus && matchesSearch;
-    });
+    }).sort((a: any, b: any) => b.id - a.id); // Sort by ID descending (newest first)
 
     // Paginate
     const totalPages = Math.ceil(filteredBookings.length / PAGE_SIZE);
@@ -227,8 +227,8 @@ const UserProfile: React.FC = () => {
                                                         <td>${b.total?.toFixed(2) || '0.00'}</td>
                                                         <td>
                                                             <span className={`badge ${b.estado === 'Confirmada' || b.estado === 'Confirmado' ? 'bg-success' :
-                                                                    b.estado === 'Completada' || b.estado === 'Completado' ? 'bg-info' :
-                                                                        b.estado?.toLowerCase()?.includes('cancel') ? 'bg-danger' : 'bg-warning'
+                                                                b.estado === 'Completada' || b.estado === 'Completado' ? 'bg-info' :
+                                                                    b.estado?.toLowerCase()?.includes('cancel') ? 'bg-danger' : 'bg-warning'
                                                                 }`}>
                                                                 {b.estado}
                                                             </span>
