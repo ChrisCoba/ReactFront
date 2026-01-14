@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
 import { ReservasService } from '../services/ReservasService';
+import CompletionModal from '../components/CompletionModal';
 
 const Cart: React.FC = () => {
     const { cart, removeFromCart, totals, clearCart } = useCart();
@@ -15,6 +16,10 @@ const Cart: React.FC = () => {
     // Payment form state
     const [nroCuenta, setNroCuenta] = useState('');
     const [showPaymentForm, setShowPaymentForm] = useState(false);
+
+    // Completion modal state
+    const [showCompletionModal, setShowCompletionModal] = useState(false);
+    const [confirmedReservations, setConfirmedReservations] = useState<{ name: string; reservaId: number }[]>([]);
 
     const handleOpenPaymentForm = () => {
         if (!isAuthenticated || !user) {
@@ -60,18 +65,28 @@ const Cart: React.FC = () => {
                 results.push({ name: item.name, reservaId: payResponse.reservaId });
             }
 
-            // Only show success message after ALL payments complete
-            const resumeMsg = results.map(r => `✓ ${r.name} - Reserva #${r.reservaId}`).join('\n');
-            showSuccess(`¡Pago exitoso!\n\n${resumeMsg}`);
-
+            // Clear cart and show completion modal
             clearCart();
             setShowPaymentForm(false);
-            navigate('/profile');
+            setConfirmedReservations(results);
+            setShowCompletionModal(true);
         } catch (error: any) {
             showError(`Error al procesar el pago: ${error.message}`);
         } finally {
             setIsProcessing(false);
         }
+    };
+
+    const handleCompletionComplete = () => {
+        setShowCompletionModal(false);
+        showSuccess('¡Reserva completada exitosamente!');
+        navigate('/profile');
+    };
+
+    const handleCompletionCancel = () => {
+        setShowCompletionModal(false);
+        showSuccess('Reserva dejada como pendiente. Puedes completarla más tarde desde tu perfil.');
+        navigate('/profile');
     };
 
     if (cart.length === 0) {
@@ -249,6 +264,15 @@ const Cart: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Post-payment completion modal */}
+            <CompletionModal
+                isOpen={showCompletionModal}
+                onClose={() => setShowCompletionModal(false)}
+                reservations={confirmedReservations}
+                onComplete={handleCompletionComplete}
+                onCancel={handleCompletionCancel}
+            />
         </section>
     );
 };

@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_USER_DASHBOARD } from '../graphql/queries';
 import { useAuth } from '../hooks/useAuth';
 import { AuthService } from '../services/AuthService';
-import { ReservasService } from '../services/ReservasService';
 import { useToast } from '../context/ToastContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ReservationDetailsModal from '../components/ReservationDetailsModal';
 
 const UserProfile: React.FC = () => {
     const { user } = useAuth();
@@ -21,6 +21,10 @@ const UserProfile: React.FC = () => {
     const [statusFilter, setStatusFilter] = React.useState('all');
     const [searchTerm, setSearchTerm] = React.useState('');
     const PAGE_SIZE = 10;
+
+    // State for details modal
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [selectedReservationId, setSelectedReservationId] = useState<number | null>(null);
 
     // Use GraphQL to fetch enriched profile data (total spent, bookings)
     const { data, loading, error, refetch } = useQuery(GET_USER_DASHBOARD, {
@@ -210,65 +214,47 @@ const UserProfile: React.FC = () => {
                                         <table className="table table-hover mb-0">
                                             <thead className="table-light">
                                                 <tr>
-                                                    <th>Cód</th>
-                                                    <th>Tour</th>
-                                                    <th>Fecha Tour</th>
+                                                    <th>ID</th>
                                                     <th>Total</th>
                                                     <th>Estado</th>
-                                                    <th>Factura</th>
+                                                    <th>Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {bookings.map((b: any) => (
-                                                    <tr key={b.codigo}>
-                                                        <td><small>{b.codigo}</small></td>
-                                                        <td>{b.package?.nombre}</td>
-                                                        <td>{b.fechaInicio ? new Date(b.fechaInicio).toLocaleDateString() : 'N/A'}</td>
+                                                    <tr key={b.codigo || b.id}>
+                                                        <td>{b.id}</td>
                                                         <td>${b.total?.toFixed(2) || '0.00'}</td>
                                                         <td>
                                                             <span className={`badge ${b.estado === 'Confirmada' || b.estado === 'Confirmado' ? 'bg-success' :
                                                                     b.estado === 'Completada' || b.estado === 'Completado' ? 'bg-info' :
-                                                                        b.estado?.toLowerCase().includes('cancel') ? 'bg-danger' : 'bg-warning'
+                                                                        b.estado?.toLowerCase()?.includes('cancel') ? 'bg-danger' : 'bg-warning'
                                                                 }`}>
                                                                 {b.estado}
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            {/* Completar button - only for Confirmada state */}
-                                                            {(b.estado === 'Confirmada' || b.estado === 'Confirmado') && (
-                                                                <button
-                                                                    className="btn btn-sm btn-success me-1"
-                                                                    onClick={async () => {
-                                                                        try {
-                                                                            await ReservasService.completarReservation(b.id);
-                                                                            showSuccess('Reserva completada exitosamente');
-                                                                            refetch();
-                                                                        } catch (error: any) {
-                                                                            showError(error.message || 'Error al completar reserva');
-                                                                        }
-                                                                    }}
-                                                                    title="Completar reserva"
-                                                                >
-                                                                    <i className="bi bi-check-circle"></i> Completar
-                                                                </button>
-                                                            )}
-                                                            {/* Invoice download button */}
-                                                            {b.facturaId && (
-                                                                <button
-                                                                    className="btn btn-sm btn-outline-primary"
-                                                                    onClick={async () => {
-                                                                        try {
-                                                                            const { FacturasService } = await import('../services/FacturasService');
-                                                                            await FacturasService.downloadInvoicePdf(b.facturaId);
-                                                                        } catch (error) {
-                                                                            showError('Error al descargar factura');
-                                                                        }
-                                                                    }}
-                                                                    title="Descargar factura PDF"
-                                                                >
-                                                                    <i className="bi bi-file-earmark-pdf"></i> PDF
-                                                                </button>
-                                                            )}
+                                                            {/* Ver Detalles button (eye icon) */}
+                                                            <button
+                                                                className="btn btn-sm btn-outline-secondary me-1"
+                                                                onClick={() => {
+                                                                    setSelectedReservationId(b.id);
+                                                                    setShowDetailsModal(true);
+                                                                }}
+                                                                title="Ver Detalles"
+                                                            >
+                                                                <i className="bi bi-eye"></i>
+                                                            </button>
+                                                            {/* Factura button (document icon) - placeholder */}
+                                                            <button
+                                                                className="btn btn-sm btn-outline-primary"
+                                                                onClick={() => {
+                                                                    showError('Función de factura próximamente');
+                                                                }}
+                                                                title="Ver Factura"
+                                                            >
+                                                                <i className="bi bi-file-earmark-text"></i>
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -307,6 +293,13 @@ const UserProfile: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Reservation Details Modal */}
+            <ReservationDetailsModal
+                isOpen={showDetailsModal}
+                onClose={() => setShowDetailsModal(false)}
+                reservationId={selectedReservationId}
+            />
         </section>
     );
 };

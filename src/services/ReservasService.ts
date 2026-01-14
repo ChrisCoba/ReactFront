@@ -97,5 +97,44 @@ export const ReservasService = {
             console.error('Complete reservation error:', error);
             throw new Error(error.response?.data?.error || error.response?.data?.message || 'No se pudo completar la reserva');
         }
+    },
+
+    /**
+     * Revert a reservation back to Pendiente state
+     * Calls: POST /api/admin/reservas/{id}/revertir
+     */
+    async revertirReservation(reservationId: number): Promise<{ message: string; reservaId: number; codigo: string; estado: string }> {
+        try {
+            const response = await apiClient.post(`${ADMIN_API}/reservas/${reservationId}/revertir`);
+            return response.data;
+        } catch (error: any) {
+            console.error('Revert reservation error:', error);
+            throw new Error(error.response?.data?.error || error.response?.data?.message || 'No se pudo revertir la reserva');
+        }
+    },
+
+    /**
+     * Get reservation details
+     * Calls: GET /api/admin/reservas/{id}/detalles
+     */
+    async getDetalles(reservationId: number): Promise<ReservaDetalle[]> {
+        try {
+            const response = await apiClient.get(`${ADMIN_API}/reservas/${reservationId}/detalles`);
+            return response.data;
+        } catch (error: any) {
+            console.error('Get detalles error:', error);
+            throw new Error(error.response?.data?.error || 'Error al obtener detalles');
+        }
     }
 };
+
+// Type for reservation details
+export interface ReservaDetalle {
+    id: number;
+    servicioId: number;
+    cantidad: number;
+    precioUnitario: number;
+    subtotal: number;
+    fechaInicio: string;
+    fechaFin: string;
+}

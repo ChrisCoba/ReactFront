@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_RESERVATIONS_LIST } from '../../graphql/queries';
 import axios from 'axios';
+import ReservationDetailsModal from '../ReservationDetailsModal';
 
 interface Reservation {
     id: number;
@@ -29,6 +30,8 @@ export const ReservationsTable: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [selectedReservationId, setSelectedReservationId] = useState<number | null>(null);
 
     const { data, loading, error, refetch } = useQuery(GET_RESERVATIONS_LIST, {
         variables: { limit: 100 },
@@ -133,9 +136,6 @@ export const ReservationsTable: React.FC = () => {
                             <tr>
                                 <th>ID</th>
                                 <th>Código</th>
-                                <th>Cliente</th>
-                                <th>Paquete</th>
-                                <th>Fecha</th>
                                 <th>Total</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
@@ -146,53 +146,48 @@ export const ReservationsTable: React.FC = () => {
                                 <tr key={res.id}>
                                     <td>{res.id}</td>
                                     <td><code>{res.codigo}</code></td>
-                                    <td>
-                                        {res.cliente?.profile?.nombre} {res.cliente?.profile?.apellido}
-                                        <br />
-                                        <small className="text-muted">{res.cliente?.email}</small>
-                                    </td>
-                                    <td>
-                                        {res.package?.nombre}
-                                        <br />
-                                        <small className="text-muted">{res.package?.ciudad}</small>
-                                    </td>
-                                    <td>{new Date(res.fechaReserva).toLocaleDateString('es-ES')}</td>
                                     <td>${res.total.toFixed(2)}</td>
                                     <td>
                                         <span className={`badge ${res.estado === 'Confirmada' || res.estado === 'Confirmado' ? 'bg-success' :
-                                            res.estado === 'Pendiente' ? 'bg-warning text-dark' :
-                                                res.estado === 'Cancelada' || res.estado === 'Cancelado' ? 'bg-danger' : 'bg-secondary'
+                                                res.estado === 'Completada' || res.estado === 'Completado' ? 'bg-info' :
+                                                    res.estado === 'Pendiente' ? 'bg-warning text-dark' :
+                                                        res.estado === 'Cancelada' || res.estado === 'Cancelado' ? 'bg-danger' : 'bg-secondary'
                                             }`}>
                                             {res.estado}
                                         </span>
                                     </td>
                                     <td>
+                                        {/* Ver Detalles button (eye icon) */}
+                                        <button
+                                            className="btn btn-sm btn-outline-secondary me-1"
+                                            onClick={() => {
+                                                setSelectedReservationId(res.id);
+                                                setShowDetailsModal(true);
+                                            }}
+                                            title="Ver Detalles"
+                                        >
+                                            <i className="bi bi-eye"></i>
+                                        </button>
+                                        {/* Factura button (document icon) - placeholder */}
+                                        <button
+                                            className="btn btn-sm btn-outline-primary me-1"
+                                            onClick={() => {
+                                                alert('Función de factura próximamente');
+                                            }}
+                                            title="Ver Factura"
+                                        >
+                                            <i className="bi bi-file-earmark-text"></i>
+                                        </button>
+                                        {/* Cancel button */}
                                         {res.estado !== 'Cancelada' && res.estado !== 'Cancelado' && (
                                             <button className="btn btn-sm btn-danger" onClick={() => handleCancel(res.id)} title="Cancelar">
                                                 <i className="bi bi-x-circle"></i>
                                             </button>
                                         )}
-                                        {' '}
-                                        {res.facturaId && (
-                                            <button
-                                                className="btn btn-sm btn-outline-primary"
-                                                onClick={async () => {
-                                                    try {
-                                                        const { FacturasService } = await import('../../services/FacturasService');
-                                                        await FacturasService.downloadInvoicePdf(res.facturaId);
-                                                    } catch (error) {
-                                                        alert('Error al descargar factura');
-                                                    }
-                                                }}
-                                                title="Descargar factura PDF"
-                                            >
-                                                <i className="bi bi-file-earmark-pdf"></i>
-                                            </button>
-                                        )}
                                     </td>
                                 </tr>
                             )) : (
-                                <tr><td colSpan={8} className="text-center p-3">No se encontraron reservas</td></tr>
+                                <tr><td colSpan={5} className="text-center p-3">No se encontraron reservas</td></tr>
                             )}
                         </tbody>
                     </table>
@@ -216,6 +211,13 @@ export const ReservationsTable: React.FC = () => {
                         </ul>
                     </nav>
                 )}
+
+                {/* Reservation Details Modal */}
+                <ReservationDetailsModal
+                    isOpen={showDetailsModal}
+                    onClose={() => setShowDetailsModal(false)}
+                    reservationId={selectedReservationId}
+                />
             </div>
         </div>
     );
