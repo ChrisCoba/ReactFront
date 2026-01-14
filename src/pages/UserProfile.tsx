@@ -101,11 +101,6 @@ const UserProfile: React.FC = () => {
                                 </div>
                                 <h4>{userData?.profile?.nombre} {userData?.profile?.apellido}</h4>
                                 <p className="text-muted">{user?.Email}</p>
-                                <div className="d-grid gap-2 mt-3">
-                                    <span className="badge bg-success p-2">
-                                        Total Gastado: ${userData?.totalSpent?.toFixed(2) || '0.00'}
-                                    </span>
-                                </div>
                             </div>
                         </div>
                     </div>
