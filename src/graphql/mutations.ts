@@ -31,3 +31,17 @@ export const CANCEL_RESERVATION = gql`
     }
   }
 `;
+
+// Mutation to update user profile
+export const UPDATE_USER_PROFILE = gql`
+  mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
+    updateUserProfile(input: $input) {
+      id
+      profile {
+        nombre
+        apellido
+        telefono
+      }
+    }
+  }
+`;

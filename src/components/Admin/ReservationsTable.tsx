@@ -170,26 +170,6 @@ export const ReservationsTable: React.FC = () => {
                                         >
                                             <i className="bi bi-eye"></i>
                                         </button>
-                                        {/* Factura button (document icon) */}
-                                        <button
-                                            className={`btn btn-sm me-1 ${res.facturaId ? 'btn-outline-primary' : 'btn-outline-secondary'}`}
-                                            onClick={async () => {
-                                                if (res.facturaId) {
-                                                    try {
-                                                        const { FacturasService } = await import('../../services/FacturasService');
-                                                        await FacturasService.downloadInvoicePdf(res.facturaId);
-                                                    } catch (error) {
-                                                        alert('Error al descargar factura');
-                                                    }
-                                                } else {
-                                                    alert('No hay factura disponible para esta reserva');
-                                                }
-                                            }}
-                                            title={res.facturaId ? 'Descargar Factura PDF' : 'Sin factura'}
-                                            disabled={!res.facturaId}
-                                        >
-                                            <i className="bi bi-file-earmark-text"></i>
-                                        </button>
                                         {/* Cancel button */}
                                         {res.estado !== 'Cancelada' && res.estado !== 'Cancelado' && (
                                             <button className="btn btn-sm btn-danger" onClick={() => handleCancel(res.id)} title="Cancelar">
