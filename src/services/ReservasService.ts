@@ -23,7 +23,7 @@ export interface PagoPreReservaResponse {
 }
 
 export interface PreReservaData {
-    UsuarioId: number;
+    UsuarioId: string;
     PaqueteId: number;
     FechaInicio: string;
     Personas: number;

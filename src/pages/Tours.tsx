@@ -101,7 +101,7 @@ const Tours: React.FC = () => {
         try {
             // Create Pre-Reserva (pending, 300s to pay)
             const preReservaData = {
-                UsuarioId: user.Id || 0,
+                UsuarioId: user.Email || '',
                 PaqueteId: parseInt(tourId),
                 FechaInicio: date,
                 Personas: totalPersonas,
