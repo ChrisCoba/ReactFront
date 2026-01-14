@@ -131,7 +131,7 @@ const UserProfile: React.FC = () => {
                                 </div>
                             </div>
                             <h4>{userData?.profile?.nombre} {userData?.profile?.apellido}</h4>
-                            <p className="text-muted">{user?.Email || user?.email}</p>
+                            <p className="text-muted">{user?.Email}</p>
                         </div>
                     </div>
                 </div>
