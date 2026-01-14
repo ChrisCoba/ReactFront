@@ -33,10 +33,9 @@ export const AuthService = {
                 Password: data.password,
                 Nombre: data.nombre,
                 Apellido: data.apellido,
-                Cedula: data.cedula || '',
             };
 
-            const response = await apiClient.post('/usuarios', payload);
+            const response = await apiClient.post('/register', payload);
             return response.data;
         } catch (error: any) {
             console.error('Registration error:', error);
@@ -94,8 +93,7 @@ export const AuthService = {
                 Password: data.password
             };
 
-            const adminUrl = "https://worldagencyadmin.runasp.net/api/admin";
-            const response = await apiClient.put(`${adminUrl}/usuarios/${id}`, payload);
+            const response = await apiClient.put(`/usuarios/${id}`, payload);
             const updatedUser = response.data;
 
             // Update storage
