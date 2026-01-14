@@ -16,6 +16,10 @@ const UserProfile: React.FC = () => {
         Telefono: '',
         password: ''
     });
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const [statusFilter, setStatusFilter] = React.useState('all');
+    const [searchTerm, setSearchTerm] = React.useState('');
+    const PAGE_SIZE = 10;
 
     // Use GraphQL to fetch enriched profile data (total spent, bookings)
     const { data, loading, error, refetch } = useQuery(GET_USER_DASHBOARD, {
@@ -33,7 +37,30 @@ const UserProfile: React.FC = () => {
     if (error) return <div className="text-danger p-5">Error cargando perfil: {error.message}</div>;
 
     const userData = data?.user;
-    const bookings = userData?.bookings || [];
+    const allBookings = userData?.bookings || [];
+
+    // Filter bookings
+    const filteredBookings = allBookings.filter((b: any) => {
+        const matchesStatus = statusFilter === 'all' ||
+            (statusFilter === 'confirmada' && (b.estado === 'Confirmada' || b.estado === 'Confirmado')) ||
+            (statusFilter === 'pendiente' && b.estado.toLowerCase().includes('pendiente')) ||
+            (statusFilter === 'cancelada' && b.estado.toLowerCase().includes('cancel'));
+
+        const matchesSearch = searchTerm === '' ||
+            b.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            b.package?.nombre?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        return matchesStatus && matchesSearch;
+    });
+
+    // Paginate
+    const totalPages = Math.ceil(filteredBookings.length / PAGE_SIZE);
+    const paginatedBookings = filteredBookings.slice(
+        (currentPage - 1) * PAGE_SIZE,
+        currentPage * PAGE_SIZE
+    );
+
+    const bookings = paginatedBookings;
 
     const handleEditClick = () => {
         setEditForm({
@@ -229,6 +256,30 @@ const UserProfile: React.FC = () => {
                                                 ))}
                                             </tbody>
                                         </table>
+                                        {/* Pagination */}
+                                        {totalPages > 1 && (
+                                            <nav className="mt-3">
+                                                <ul className="pagination justify-content-center mb-0">
+                                                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                                        <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)}>
+                                                            &laquo; Anterior
+                                                        </button>
+                                                    </li>
+                                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                                        <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
+                                                            <button className="page-link" onClick={() => setCurrentPage(page)}>
+                                                                {page}
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                                        <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)}>
+                                                            Siguiente &raquo;
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="p-4 text-center text-muted">No tienes reservas recientes.</div>
