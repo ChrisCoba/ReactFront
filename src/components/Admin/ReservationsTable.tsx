@@ -52,6 +52,7 @@ export const ReservationsTable: React.FC = () => {
 
             const matchesStatus = statusFilter === 'all' ||
                 (statusFilter === 'confirmado' && (res.estado === 'Confirmada' || res.estado === 'Confirmado')) ||
+                (statusFilter === 'completado' && (res.estado === 'Completada' || res.estado === 'Completado')) ||
                 (statusFilter === 'pendiente' && res.estado === 'Pendiente') ||
                 (statusFilter === 'cancelado' && (res.estado === 'Cancelada' || res.estado === 'Cancelado'));
 
@@ -124,6 +125,7 @@ export const ReservationsTable: React.FC = () => {
                         >
                             <option value="all">Todos los Estados</option>
                             <option value="confirmado">Confirmado</option>
+                            <option value="completado">Completado</option>
                             <option value="pendiente">Pendiente</option>
                             <option value="cancelado">Cancelado</option>
                         </select>

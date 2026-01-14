@@ -49,6 +49,7 @@ const UserProfile: React.FC = () => {
     const filteredBookings = allBookings.filter((b: any) => {
         const matchesStatus = statusFilter === 'all' ||
             (statusFilter === 'confirmada' && (b.estado === 'Confirmada' || b.estado === 'Confirmado')) ||
+            (statusFilter === 'completada' && (b.estado === 'Completada' || b.estado === 'Completado')) ||
             (statusFilter === 'pendiente' && b.estado.toLowerCase().includes('pendiente')) ||
             (statusFilter === 'cancelada' && b.estado.toLowerCase().includes('cancel'));
 
@@ -207,7 +208,23 @@ const UserProfile: React.FC = () => {
 
                         <div className="card shadow-sm">
                             <div className="card-header bg-white py-3">
-                                <h5 className="mb-0">Mis Reservas Recientes</h5>
+                                <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <h5 className="mb-0">Mis Reservas Recientes</h5>
+                                    <div className="d-flex gap-2">
+                                        <select
+                                            className="form-select form-select-sm"
+                                            style={{ width: 'auto' }}
+                                            value={statusFilter}
+                                            onChange={(e) => setStatusFilter(e.target.value)}
+                                        >
+                                            <option value="all">Todos</option>
+                                            <option value="confirmada">Confirmada</option>
+                                            <option value="completada">Completada</option>
+                                            <option value="pendiente">Pendiente</option>
+                                            <option value="cancelada">Cancelada</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             <div className="card-body p-0">
                                 {bookings.length > 0 ? (

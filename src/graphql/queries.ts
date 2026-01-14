@@ -54,7 +54,7 @@ export const GET_USER_DASHBOARD = gql`
     user(id: $userId) {
       ...UserFields
       totalSpent
-      bookings(limit: 10) {
+      bookings(limit: 50) {
         id
         codigo
         fechaReserva
